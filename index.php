@@ -51,7 +51,14 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                     <i class="fas fa-redo"></i>
                 </button>
             </div>
-            
+
+            <div class="action-buttons">
+                <button class="action-btn" onclick="showCreateFolderModal()" title="Nouveau dossier">
+                    <i class="fas fa-folder-plus"></i>
+                    <span>Nouveau dossier</span>
+                </button>
+            </div>
+
             <div class="address-bar">
                 <?php foreach ($breadcrumbs as $index => $breadcrumb): ?>
                     <?php if ($index > 0): ?><i class="fas fa-chevron-right" style="margin: 0 8px; color: #ccc; font-size: 10px;"></i><?php endif; ?>
@@ -133,7 +140,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                         <div class="files-grid" id="grid-container">
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($item['path']); ?>" class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
                                         <div class="file-options" onclick="event.preventDefault(); event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
@@ -179,7 +186,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                             </div>
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($item['path']); ?>" class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
                                         <div class="list-col list-col-name">
                                             <span class="list-icon"><?php echo $explorer->getFileIcon($item['name'], $item['type']); ?></span>
                                             <span class="list-name"><?php echo htmlspecialchars($item['name']); ?></span>
@@ -255,6 +262,28 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                 </button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmHide()">
                     <i class="fas fa-eye-slash"></i> Masquer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de création de dossier -->
+    <div class="modal-overlay" id="createFolderModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-folder-plus"></i> Créer un nouveau dossier</h3>
+            </div>
+            <div class="modal-body">
+                <p>Entrez le nom du nouveau dossier :</p>
+                <input type="text" id="folderNameInput" class="modal-input" placeholder="Nom du dossier" maxlength="255">
+                <div id="folderError" class="modal-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeCreateFolderModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmCreateFolder()">
+                    <i class="fas fa-folder-plus"></i> Créer
                 </button>
             </div>
         </div>

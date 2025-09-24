@@ -9,9 +9,24 @@ class FileExplorer {
 
     public function __construct($baseDir = '.') {
         $this->baseDir = realpath($baseDir);
-        $this->currentDir = isset($_GET['dir']) ? $_GET['dir'] : $this->baseDir;
-        $this->currentDir = realpath($this->currentDir) ?: $this->baseDir;
+        $requestedDir = isset($_GET['dir']) ? $_GET['dir'] : '.';
 
+        // Si on demande un répertoire système (comme C:), utiliser le répertoire de base
+        if ($requestedDir === 'C:' || strpos($requestedDir, 'C:\\') === 0) {
+            $this->currentDir = $this->baseDir;
+        } else if ($requestedDir === '.') {
+            $this->currentDir = $this->baseDir;
+        } else {
+            // Pour les chemins relatifs, les construire à partir du répertoire de base
+            if (!$this->isAbsolutePath($requestedDir)) {
+                $fullPath = $this->baseDir . DIRECTORY_SEPARATOR . $requestedDir;
+                $this->currentDir = realpath($fullPath) ?: $this->baseDir;
+            } else {
+                $this->currentDir = realpath($requestedDir) ?: $this->baseDir;
+            }
+        }
+
+        // Vérification de sécurité : s'assurer qu'on reste dans le répertoire de base
         if (strpos($this->currentDir, $this->baseDir) !== 0) {
             $this->currentDir = $this->baseDir;
         }
@@ -28,12 +43,12 @@ class FileExplorer {
         $relativePath = str_replace($this->baseDir, '', $this->currentDir);
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $relativePath));
 
-        $breadcrumbs = [['name' => 'Home', 'path' => $this->baseDir]];
-        $currentPath = $this->baseDir;
+        $breadcrumbs = [['name' => 'Home', 'path' => '.']];
+        $currentRelativePath = '';
 
         foreach ($parts as $part) {
-            $currentPath .= DIRECTORY_SEPARATOR . $part;
-            $breadcrumbs[] = ['name' => $part, 'path' => $currentPath];
+            $currentRelativePath .= ($currentRelativePath ? DIRECTORY_SEPARATOR : '') . $part;
+            $breadcrumbs[] = ['name' => $part, 'path' => $currentRelativePath];
         }
 
         return $breadcrumbs;
@@ -134,5 +149,29 @@ class FileExplorer {
 
     public function getHiddenManager() {
         return $this->hiddenManager;
+    }
+
+    public function getRelativePath($fullPath) {
+        // Si c'est déjà le répertoire de base, retourner '.'
+        if ($fullPath === $this->baseDir) {
+            return '.';
+        }
+
+        // Convertir le chemin absolu en chemin relatif au répertoire de base
+        $relativePath = str_replace($this->baseDir, '', $fullPath);
+        $relativePath = trim($relativePath, DIRECTORY_SEPARATOR);
+
+        if (empty($relativePath)) {
+            return '.';
+        }
+
+        // Sur Windows, convertir les \ en / pour l'URL, mais garder le format pour le système
+        return $relativePath;
+    }
+
+    private function isAbsolutePath($path) {
+        // Sur Windows : C:\... ou sur Unix : /...
+        return (DIRECTORY_SEPARATOR === '\\' && preg_match('/^[A-Za-z]:/', $path)) ||
+               (DIRECTORY_SEPARATOR === '/' && strpos($path, '/') === 0);
     }
 }

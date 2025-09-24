@@ -104,6 +104,41 @@ body {
     border-color: #999;
 }
 
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: 15px;
+    padding-left: 15px;
+    border-left: 1px solid #ddd;
+}
+
+.action-btn {
+    height: 32px;
+    border: 1px solid #0078d4;
+    background: rgba(0, 120, 212, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    color: #0078d4;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    background: rgba(0, 120, 212, 0.2);
+    border-color: #106ebe;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 120, 212, 0.2);
+}
+
+.action-btn i {
+    font-size: 14px;
+}
+
 .address-bar {
     flex: 1;
     height: 32px;
