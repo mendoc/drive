@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/HiddenManager.php';
+require_once __DIR__ . '/TrashManager.php';
 
 class FileExplorer {
     private $baseDir;
@@ -77,6 +78,11 @@ class FileExplorer {
     }
 
     public function getDirectoryContents() {
+        // Si on est dans la corbeille, utiliser TrashManager
+        if (strpos($this->currentDir, '.explorer' . DIRECTORY_SEPARATOR . 'trash') !== false) {
+            return $this->getTrashContents();
+        }
+
         $items = [];
 
         if (is_readable($this->currentDir)) {
@@ -119,6 +125,11 @@ class FileExplorer {
         });
 
         return $items;
+    }
+
+    private function getTrashContents() {
+        $trashManager = new TrashManager($this->baseDir);
+        return $trashManager->getTrashContents();
     }
 
     public function formatFileSize($bytes) {

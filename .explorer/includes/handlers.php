@@ -4,6 +4,7 @@ require_once __DIR__ . '/config.php';
 require_once CLASSES_DIR . '/FileExplorer.php';
 require_once CLASSES_DIR . '/HiddenManager.php';
 require_once CLASSES_DIR . '/UploadManager.php';
+require_once CLASSES_DIR . '/TrashManager.php';
 
 // Gestion des actions AJAX
 function handleAjaxRequest() {
@@ -18,6 +19,8 @@ function handleAjaxRequest() {
             return handleCreateFolderAction();
         case 'upload':
             return handleUploadAction();
+        case 'move_to_trash':
+            return handleMoveToTrashAction();
         default:
             return false;
     }
@@ -159,6 +162,45 @@ function handleUploadAction() {
             'success' => false,
             'error' => 'Erreur du serveur : ' . $e->getMessage()
         ]);
+    }
+
+    return true;
+}
+
+// Gestion du déplacement vers la corbeille
+function handleMoveToTrashAction() {
+    $pathToDelete = $_POST['path'] ?? '';
+    if (empty($pathToDelete)) {
+        echo json_encode(['success' => false, 'error' => 'Chemin manquant']);
+        return true;
+    }
+
+    // Sécurité : vérifier que le chemin est valide
+    $realPath = realpath($pathToDelete);
+    if (!$realPath || !file_exists($realPath)) {
+        echo json_encode(['success' => false, 'error' => 'Fichier ou dossier introuvable']);
+        return true;
+    }
+
+    // Vérifier qu'on ne supprime pas le framework ou des fichiers système
+    if (strpos($realPath, '.explorer') !== false ||
+        strpos($realPath, 'CLAUDE.md') !== false ||
+        strpos($realPath, 'index.php') !== false) {
+        echo json_encode(['success' => false, 'error' => 'Impossible de supprimer les fichiers système']);
+        return true;
+    }
+
+    try {
+        $trashManager = new TrashManager('.');
+        $trashManager->moveToTrash($realPath);
+
+        $itemName = basename($realPath);
+        $itemType = is_dir($realPath) ? 'dossier' : 'fichier';
+        $message = ucfirst($itemType) . ' "' . $itemName . '" déplacé vers la corbeille';
+
+        echo json_encode(['success' => true, 'message' => $message]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
 
     return true;

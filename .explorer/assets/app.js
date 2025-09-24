@@ -135,6 +135,7 @@ document.addEventListener('keydown', function(e) {
         const confirmModal = document.getElementById('confirmModal');
         const createFolderModal = document.getElementById('createFolderModal');
         const uploadModal = document.getElementById('uploadModal');
+        const trashModal = document.getElementById('trashModal');
 
         if (confirmModal && confirmModal.style.display !== 'none') {
             closeModal();
@@ -142,6 +143,8 @@ document.addEventListener('keydown', function(e) {
             closeCreateFolderModal();
         } else if (uploadModal && uploadModal.style.display !== 'none') {
             closeUploadModal();
+        } else if (trashModal && trashModal.style.display !== 'none') {
+            closeTrashModal();
         }
     }
 });
@@ -650,6 +653,154 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeUploadModal();
+            }
+        });
+    }
+});
+
+// === FONCTIONNALITÉ CORBEILLE ===
+
+// Variables globales pour la corbeille
+let currentTrashPath = '';
+
+// Afficher la modale de confirmation de suppression
+function moveToTrash(path) {
+    currentTrashPath = path;
+    const filename = path.split(/[\\\/]/).pop();
+    document.querySelector('.modal-filename-trash').textContent = filename;
+
+    const modal = document.getElementById('trashModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+}
+
+// Fermer la modale de corbeille
+function closeTrashModal() {
+    const modal = document.getElementById('trashModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+        currentTrashPath = '';
+    }, 300);
+}
+
+// Confirmer le déplacement vers la corbeille
+function confirmMoveToTrash() {
+    if (currentTrashPath) {
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=move_to_trash&path=' + encodeURIComponent(currentTrashPath)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeTrashModal();
+                // Afficher un message de succès temporaire
+                if (data.message) {
+                    showSuccessMessage(data.message);
+                }
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                closeTrashModal();
+                showErrorMessage(data.error || 'Erreur lors de la suppression');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            closeTrashModal();
+            showErrorMessage('Erreur de communication avec le serveur');
+        });
+    }
+}
+
+// Afficher un message de succès temporaire
+function showSuccessMessage(message) {
+    const successDiv = document.createElement('div');
+    successDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease-out;
+    `;
+    successDiv.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 8px;"></i>${message}`;
+
+    // Ajouter l'animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(successDiv);
+
+    setTimeout(() => {
+        successDiv.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => {
+            document.body.removeChild(successDiv);
+            document.head.removeChild(style);
+        }, 300);
+    }, 3000);
+}
+
+// Afficher un message d'erreur temporaire
+function showErrorMessage(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease-out;
+    `;
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>${message}`;
+
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        errorDiv.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => {
+            document.body.removeChild(errorDiv);
+        }, 300);
+    }, 4000);
+}
+
+// Fermer la modale de corbeille en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('trashModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTrashModal();
             }
         });
     }

@@ -1,0 +1,10 @@
+Ceci est un fichier de test pour la fonctionnalité d'upload.
+Contenu créé le 24 septembre 2025.
+
+Test des fonctionnalités :
+- Upload simple
+- Validation des fichiers
+- Interface utilisateur
+- Drag & Drop
+
+Ligne avec des caractères spéciaux : àâäéèêë çñ

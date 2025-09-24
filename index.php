@@ -130,10 +130,10 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                     <div class="quick-name"><?php echo htmlspecialchars($item['name']); ?></div>
                                 </a>
                             <?php endforeach; ?>
-                            <div class="quick-item" style="border: 2px dashed #ddd; background: transparent;">
+                            <a href="?dir=<?php echo urlencode('.explorer/trash'); ?>" class="quick-item" style="border: 2px dashed #ddd; background: transparent;">
                                 <div class="quick-icon" style="color: #999;">♻️</div>
                                 <div class="quick-name" style="color: #999;">Corbeille</div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -151,6 +151,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
+                                                <div class="option-item" onclick="moveToTrash('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-trash"></i> Mettre à la corbeille
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="file-icon">
@@ -165,6 +168,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                             <div class="options-menu">
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
+                                                </div>
+                                                <div class="option-item" onclick="moveToTrash('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-trash"></i> Mettre à la corbeille
                                                 </div>
                                             </div>
                                         </div>
@@ -206,6 +212,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
+                                                <div class="option-item" onclick="moveToTrash('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-trash"></i> Mettre à la corbeille
+                                                </div>
                                             </div>
                                         </div>
                                     </a>
@@ -232,6 +241,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                             <div class="options-menu">
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
+                                                </div>
+                                                <div class="option-item" onclick="moveToTrash('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-trash"></i> Mettre à la corbeille
                                                 </div>
                                             </div>
                                         </div>
@@ -288,6 +300,30 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                 </button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmCreateFolder()">
                     <i class="fas fa-folder-plus"></i> Créer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de confirmation de suppression -->
+    <div class="modal-overlay" id="trashModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash"></i> Confirmer la suppression</h3>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment déplacer cet élément vers la corbeille ?</p>
+                <p class="modal-filename-trash"></p>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> L'élément sera déplacé dans la corbeille et pourra être restauré.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeTrashModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmMoveToTrash()">
+                    <i class="fas fa-trash"></i> Mettre à la corbeille
                 </button>
             </div>
         </div>

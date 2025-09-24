@@ -28,12 +28,15 @@
 - **Menu contextuel** : Trois points horizontaux sur chaque élément (grille et liste)
 - **Système de masquage** : Option "Masquer" dans le menu contextuel
 - **Fichier .hidden** : Stockage persistant des éléments masqués
+- **Corbeille fonctionnelle** : Suppression réversible avec déplacement vers corbeille ✨
+- **Suppression sécurisée** : Protection des fichiers système, gestion des conflits
 
 #### Interface moderne
 - **Animations** : Animate.css avec durée 0.3s pour toutes les modales
 - **Modale de confirmation** : Interface élégante pour confirmer le masquage
 - **Modale de création** : Interface intuitive pour créer des dossiers ✨
 - **Modale d'upload** : Zone drag & drop interactive avec prévisualisation ✨
+- **Modale de corbeille** : Confirmation de suppression avec informations détaillées ✨
 - **Icônes** : Font Awesome + emojis pour les types de fichiers
 - **Effets hover** : Animations et transitions fluides
 - **Raccourcis clavier** : Entrée pour confirmer, Échap pour annuler
@@ -46,6 +49,7 @@ drive/
 ├── index.php                    # Point d'entrée HTML
 ├── .explorer/                   # Framework caché (non visible utilisateur)
 │   ├── .hidden                  # Configuration éléments masqués
+│   ├── trash/                   # Corbeille pour éléments supprimés ✨
 │   ├── assets/
 │   │   ├── style.css           # Styles CSS séparés
 │   │   ├── app.js              # JavaScript modulaire
@@ -53,7 +57,8 @@ drive/
 │   ├── classes/
 │   │   ├── FileExplorer.php    # Navigation et gestion fichiers
 │   │   ├── HiddenManager.php   # Système de masquage
-│   │   └── UploadManager.php   # Gestion des uploads de fichiers
+│   │   ├── UploadManager.php   # Gestion des uploads de fichiers
+│   │   └── TrashManager.php    # Gestion de la corbeille ✨
 │   └── includes/
 │       ├── config.php          # Configuration centralisée
 │       └── handlers.php        # Gestionnaires AJAX et validation
@@ -63,7 +68,8 @@ drive/
 - **HiddenManager** : Gestion du fichier .hidden et filtrage
 - **FileExplorer** : Navigation, lecture dossiers, formatage, icônes, chemins relatifs
 - **UploadManager** : Upload sécurisé, validation MIME, gestion doublons, noms sécurisés
-- **Handlers** : Actions AJAX (création dossiers, masquage, upload), validation sécurisée
+- **TrashManager** : Corbeille avec métadonnées, déplacement sécurisé, renommage automatique ✨
+- **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille), validation sécurisée
 
 ### Sécurité
 - **Protection traversal** : Sécurisation contre l'accès aux dossiers parents
@@ -71,15 +77,18 @@ drive/
 - **Échappement HTML** : Protection XSS sur tous les affichages
 - **Upload sécurisé** : Validation MIME, filtrage extensions, taille limitée (50MB)
 - **Types interdits** : Blocage des fichiers exécutables (.php, .exe, .bat, etc.)
+- **Protection système** : Impossible de supprimer les fichiers du framework et système
+- **Corbeille sécurisée** : Métadonnées de restauration, validation des chemins
 
 ### Fonctionnalités à développer
 
 #### Prochaines étapes suggérées
-1. **Renommer** : Menu contextuel étendu pour fichiers et dossiers
-2. **Supprimer** : Avec corbeille fonctionnelle et confirmation
-3. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
-4. **Aperçu fichiers** : Preview pour images, PDF, texte
-5. **Recherche avancée** : Filtres par type, taille, date
+1. **Restaurer depuis la corbeille** : Fonctionnalité pour remettre les éléments à leur place
+2. **Vider la corbeille** : Suppression définitive avec confirmation
+3. **Renommer** : Menu contextuel étendu pour fichiers et dossiers
+4. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
+5. **Aperçu fichiers** : Preview pour images, PDF, texte
+6. **Recherche avancée** : Filtres par type, taille, date
 
 ### Notes de développement
 
@@ -118,11 +127,21 @@ php -S localhost:8000
 - **Gestion des doublons** : Renommage automatique intelligent
 - **Interface responsive** : Adaptation mobile et desktop
 
+#### Corbeille fonctionnelle (24/09/2025) ✨
+- **Suppression réversible** : Déplacement vers `.explorer/trash/` au lieu de suppression définitive
+- **Métadonnées complètes** : Stockage du chemin d'origine, date de suppression, nom original
+- **Interface utilisateur** : Modale de confirmation élégante avec animations
+- **Messages de feedback** : Notifications de succès/erreur avec animations
+- **Navigation intégrée** : Corbeille accessible via l'accès rapide
+- **Sécurité avancée** : Protection des fichiers système, gestion des conflits de noms
+- **Architecture modulaire** : Classe TrashManager dédiée et handler AJAX spécialisé
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
 - Upload de fichiers testé et fonctionnel ✅
+- Corbeille fonctionnelle testée et opérationnelle ✅
 
 ---
 *Dernière mise à jour : 2025-09-24*
-*État : Stable et fonctionnel - Import de fichiers ajouté*
+*État : Stable et fonctionnel - Corbeille fonctionnelle ajoutée*
