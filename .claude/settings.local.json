@@ -4,7 +4,10 @@
       "Bash(mkdir:*)",
       "Bash(move style.css .explorer/assets/)",
       "Bash(move:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(php:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
