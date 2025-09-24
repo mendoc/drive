@@ -3,6 +3,7 @@
 require_once __DIR__ . '/config.php';
 require_once CLASSES_DIR . '/FileExplorer.php';
 require_once CLASSES_DIR . '/HiddenManager.php';
+require_once CLASSES_DIR . '/UploadManager.php';
 
 // Gestion des actions AJAX
 function handleAjaxRequest() {
@@ -15,6 +16,8 @@ function handleAjaxRequest() {
             return handleHideAction();
         case 'create_folder':
             return handleCreateFolderAction();
+        case 'upload':
+            return handleUploadAction();
         default:
             return false;
     }
@@ -109,4 +112,54 @@ function validateFilename($filename) {
     }
 
     return ['valid' => true];
+}
+
+// Gestion de l'upload de fichiers
+function handleUploadAction() {
+    // Vérifier qu'il y a bien des fichiers uploadés
+    if (!isset($_FILES['files']) || empty($_FILES['files']['tmp_name'])) {
+        echo json_encode(['success' => false, 'error' => 'Aucun fichier n\'a été sélectionné']);
+        return true;
+    }
+
+    $currentDir = $_POST['current_dir'] ?? '.';
+
+    // Validation du répertoire de destination
+    $realCurrentDir = realpath($currentDir);
+    if (!$realCurrentDir || !is_dir($realCurrentDir)) {
+        echo json_encode(['success' => false, 'error' => 'Répertoire de destination invalide']);
+        return true;
+    }
+
+    try {
+        $uploadManager = new UploadManager($realCurrentDir);
+        $result = $uploadManager->upload($_FILES['files'], $realCurrentDir);
+
+        if ($result['success']) {
+            $message = $result['count'] === 1
+                ? 'Fichier importé avec succès'
+                : $result['count'] . ' fichiers importés avec succès';
+
+            echo json_encode([
+                'success' => true,
+                'message' => $message,
+                'uploaded_files' => $result['uploaded_files'],
+                'count' => $result['count'],
+                'errors' => $result['errors']
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'error' => 'Échec de l\'import',
+                'details' => $result['errors']
+            ]);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Erreur du serveur : ' . $e->getMessage()
+        ]);
+    }
+
+    return true;
 }

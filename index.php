@@ -57,6 +57,10 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                     <i class="fas fa-folder-plus"></i>
                     <span>Nouveau dossier</span>
                 </button>
+                <button class="action-btn" onclick="showUploadModal()" title="Importer fichier">
+                    <i class="fas fa-upload"></i>
+                    <span>Importer fichier</span>
+                </button>
             </div>
 
             <div class="address-bar">
@@ -284,6 +288,71 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                 </button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmCreateFolder()">
                     <i class="fas fa-folder-plus"></i> Créer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'upload -->
+    <div class="modal-overlay" id="uploadModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-upload"></i> Importer des fichiers</h3>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-content">
+                            <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                            <h4>Glissez vos fichiers ici</h4>
+                            <p>ou</p>
+                            <button class="upload-browse-btn" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open"></i> Parcourir les fichiers
+                            </button>
+                            <input type="file" id="fileInput" multiple style="display: none;" accept="<?php
+                                echo implode(',', array_map(function($ext) { return '.' . $ext; }, ALLOWED_FILE_TYPES));
+                            ?>">
+                        </div>
+                        <div class="drop-zone-dragover" style="display: none;">
+                            <i class="fas fa-download drop-icon-large"></i>
+                            <h3>Relâchez pour importer</h3>
+                        </div>
+                    </div>
+
+                    <div class="file-info">
+                        <p class="file-limits">
+                            <i class="fas fa-info-circle"></i>
+                            Taille maximale : <?php
+                                $maxSize = MAX_FILE_SIZE / 1024 / 1024;
+                                echo round($maxSize, 1) . ' MB';
+                            ?> par fichier
+                        </p>
+                        <p class="file-types">
+                            Types autorisés : <?php echo implode(', ', array_slice(ALLOWED_FILE_TYPES, 0, 8)); ?>...
+                        </p>
+                    </div>
+
+                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="upload-progress-bar">
+                            <div class="upload-progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="upload-status" id="uploadStatus">Préparation...</div>
+                    </div>
+
+                    <div class="selected-files" id="selectedFiles" style="display: none;">
+                        <h4>Fichiers sélectionnés :</h4>
+                        <div class="selected-files-list" id="selectedFilesList"></div>
+                    </div>
+
+                    <div class="upload-error" id="uploadError" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeUploadModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" id="uploadBtn" onclick="startUpload()" disabled>
+                    <i class="fas fa-upload"></i> Importer
                 </button>
             </div>
         </div>

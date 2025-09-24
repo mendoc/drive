@@ -134,11 +134,14 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const confirmModal = document.getElementById('confirmModal');
         const createFolderModal = document.getElementById('createFolderModal');
+        const uploadModal = document.getElementById('uploadModal');
 
         if (confirmModal && confirmModal.style.display !== 'none') {
             closeModal();
         } else if (createFolderModal && createFolderModal.style.display !== 'none') {
             closeCreateFolderModal();
+        } else if (uploadModal && uploadModal.style.display !== 'none') {
+            closeUploadModal();
         }
     }
 });
@@ -277,6 +280,376 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeCreateFolderModal();
+            }
+        });
+    }
+});
+
+// === FONCTIONNALITÉ UPLOAD DE FICHIERS ===
+
+// Variables globales pour l'upload
+let selectedFilesForUpload = [];
+let isUploading = false;
+
+// Afficher la modale d'upload
+function showUploadModal() {
+    const modal = document.getElementById('uploadModal');
+    const modalContent = modal.querySelector('.modal');
+
+    // Réinitialiser l'état
+    resetUploadModal();
+
+    // Afficher la modale
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+
+    // Configurer les event listeners
+    setupUploadEventListeners();
+}
+
+// Fermer la modale d'upload
+function closeUploadModal() {
+    if (isUploading) {
+        if (!confirm('Un upload est en cours. Voulez-vous vraiment annuler ?')) {
+            return;
+        }
+    }
+
+    const modal = document.getElementById('uploadModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+        resetUploadModal();
+    }, 300);
+}
+
+// Réinitialiser la modale d'upload
+function resetUploadModal() {
+    selectedFilesForUpload = [];
+    isUploading = false;
+
+    // Réinitialiser les éléments UI
+    const elements = {
+        uploadProgress: document.getElementById('uploadProgress'),
+        selectedFiles: document.getElementById('selectedFiles'),
+        selectedFilesList: document.getElementById('selectedFilesList'),
+        uploadError: document.getElementById('uploadError'),
+        uploadBtn: document.getElementById('uploadBtn'),
+        progressFill: document.getElementById('progressFill'),
+        uploadStatus: document.getElementById('uploadStatus')
+    };
+
+    if (elements.uploadProgress) elements.uploadProgress.style.display = 'none';
+    if (elements.selectedFiles) elements.selectedFiles.style.display = 'none';
+    if (elements.selectedFilesList) elements.selectedFilesList.innerHTML = '';
+    if (elements.uploadError) {
+        elements.uploadError.style.display = 'none';
+        elements.uploadError.innerHTML = '';
+    }
+    if (elements.uploadBtn) {
+        elements.uploadBtn.disabled = true;
+        elements.uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Importer';
+    }
+    if (elements.progressFill) elements.progressFill.style.width = '0%';
+    if (elements.uploadStatus) elements.uploadStatus.textContent = 'Préparation...';
+}
+
+// Configurer les event listeners pour l'upload
+function setupUploadEventListeners() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    if (!dropZone || !fileInput) return;
+
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        dropZone.querySelector('.drop-zone-content').style.display = 'none';
+        dropZone.querySelector('.drop-zone-dragover').style.display = 'flex';
+    }
+
+    function unhighlight() {
+        dropZone.querySelector('.drop-zone-content').style.display = 'flex';
+        dropZone.querySelector('.drop-zone-dragover').style.display = 'none';
+    }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', handleFileSelect, false);
+}
+
+// Gestion du drop de fichiers
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+}
+
+// Gestion de la sélection de fichiers
+function handleFileSelect(e) {
+    const files = e.target.files;
+    handleFiles(files);
+}
+
+// Traiter les fichiers sélectionnés
+function handleFiles(files) {
+    selectedFilesForUpload = Array.from(files);
+
+    if (selectedFilesForUpload.length === 0) {
+        return;
+    }
+
+    // Validation côté client
+    const validFiles = [];
+    const errors = [];
+
+    selectedFilesForUpload.forEach(file => {
+        const validation = validateFileClient(file);
+        if (validation.valid) {
+            validFiles.push(file);
+        } else {
+            errors.push(`${file.name}: ${validation.error}`);
+        }
+    });
+
+    selectedFilesForUpload = validFiles;
+
+    // Afficher les erreurs s'il y en a
+    const errorElement = document.getElementById('uploadError');
+    if (errors.length > 0) {
+        errorElement.innerHTML = '<h4>Fichiers non valides :</h4><ul>' +
+            errors.map(error => `<li>${error}</li>`).join('') + '</ul>';
+        errorElement.style.display = 'block';
+    } else {
+        errorElement.style.display = 'none';
+    }
+
+    // Afficher les fichiers valides
+    displaySelectedFiles();
+
+    // Activer/désactiver le bouton d'upload
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = selectedFilesForUpload.length === 0;
+}
+
+// Validation côté client
+function validateFileClient(file) {
+    // Taille maximale (50 MB)
+    if (file.size > 50 * 1024 * 1024) {
+        return { valid: false, error: 'Fichier trop volumineux (max 50 MB)' };
+    }
+
+    if (file.size === 0) {
+        return { valid: false, error: 'Fichier vide' };
+    }
+
+    // Extension
+    const extension = file.name.split('.').pop().toLowerCase();
+    const allowedTypes = [
+        'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg',
+        'txt', 'doc', 'docx', 'pdf', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx',
+        'zip', 'rar', '7z', 'tar', 'gz',
+        'mp3', 'wav', 'flac', 'aac', 'm4a', 'mp4', 'avi', 'mkv', 'mov', 'wmv',
+        'css', 'js', 'json', 'xml', 'csv'
+    ];
+
+    if (!allowedTypes.includes(extension)) {
+        return { valid: false, error: 'Type de fichier non autorisé' };
+    }
+
+    return { valid: true };
+}
+
+// Afficher les fichiers sélectionnés
+function displaySelectedFiles() {
+    const selectedFilesElement = document.getElementById('selectedFiles');
+    const selectedFilesList = document.getElementById('selectedFilesList');
+
+    if (selectedFilesForUpload.length === 0) {
+        selectedFilesElement.style.display = 'none';
+        return;
+    }
+
+    selectedFilesList.innerHTML = '';
+    selectedFilesForUpload.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'selected-file-item';
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <i class="fas fa-file"></i>
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">(${formatFileSize(file.size)})</span>
+            </div>
+            <button class="remove-file-btn" onclick="removeFile(${index})" title="Supprimer">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        selectedFilesList.appendChild(fileItem);
+    });
+
+    selectedFilesElement.style.display = 'block';
+}
+
+// Supprimer un fichier de la sélection
+function removeFile(index) {
+    selectedFilesForUpload.splice(index, 1);
+    displaySelectedFiles();
+
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = selectedFilesForUpload.length === 0;
+}
+
+// Formater la taille de fichier
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// Commencer l'upload
+function startUpload() {
+    if (selectedFilesForUpload.length === 0 || isUploading) return;
+
+    isUploading = true;
+
+    // Préparer le formulaire
+    const formData = new FormData();
+    formData.append('action', 'upload');
+    formData.append('current_dir', currentDirectory);
+
+    selectedFilesForUpload.forEach(file => {
+        formData.append('files[]', file);
+    });
+
+    // Afficher la barre de progression
+    const uploadProgress = document.getElementById('uploadProgress');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    uploadProgress.style.display = 'block';
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload en cours...';
+
+    // Créer la requête XMLHttpRequest pour le suivi de progression
+    const xhr = new XMLHttpRequest();
+
+    // Suivi de progression
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            updateProgress(percentComplete);
+        }
+    });
+
+    // Réponse de la requête
+    xhr.addEventListener('load', function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                handleUploadResponse(response);
+            } catch (e) {
+                handleUploadError('Réponse serveur invalide');
+            }
+        } else {
+            handleUploadError('Erreur serveur (Code: ' + xhr.status + ')');
+        }
+    });
+
+    xhr.addEventListener('error', function() {
+        handleUploadError('Erreur de connexion');
+    });
+
+    xhr.addEventListener('abort', function() {
+        handleUploadError('Upload annulé');
+    });
+
+    // Envoyer la requête
+    xhr.open('POST', '', true);
+    xhr.send(formData);
+}
+
+// Mettre à jour la barre de progression
+function updateProgress(percent) {
+    const progressFill = document.getElementById('progressFill');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    if (progressFill) progressFill.style.width = percent + '%';
+    if (uploadStatus) uploadStatus.textContent = `Upload en cours... ${Math.round(percent)}%`;
+}
+
+// Gérer la réponse d'upload
+function handleUploadResponse(response) {
+    const uploadStatus = document.getElementById('uploadStatus');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    if (response.success) {
+        updateProgress(100);
+        uploadStatus.textContent = response.message;
+        uploadBtn.innerHTML = '<i class="fas fa-check"></i> Terminé';
+
+        // Fermer et recharger après 2 secondes
+        setTimeout(() => {
+            closeUploadModal();
+            location.reload();
+        }, 2000);
+    } else {
+        handleUploadError(response.error, response.details);
+    }
+
+    isUploading = false;
+}
+
+// Gérer les erreurs d'upload
+function handleUploadError(error, details = null) {
+    const uploadError = document.getElementById('uploadError');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+
+    let errorMessage = '<h4>Erreur d\'upload :</h4><p>' + error + '</p>';
+
+    if (details && details.length > 0) {
+        errorMessage += '<ul>' + details.map(detail => `<li>${detail}</li>`).join('') + '</ul>';
+    }
+
+    uploadError.innerHTML = errorMessage;
+    uploadError.style.display = 'block';
+
+    uploadProgress.style.display = 'none';
+    uploadBtn.disabled = false;
+    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Réessayer';
+
+    isUploading = false;
+}
+
+// Fermer la modale d'upload en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('uploadModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUploadModal();
             }
         });
     }

@@ -17,6 +17,23 @@ define('FORBIDDEN_CHARS', ['/', '\\', ':', '*', '?', '"', '<', '>', '|']);
 define('DEFAULT_VIEW_MODE', 'grid');
 define('ITEMS_PER_PAGE', 100);
 
+// Configuration d'upload
+define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50 MB en bytes
+define('ALLOWED_FILE_TYPES', [
+    // Images
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg',
+    // Documents
+    'txt', 'doc', 'docx', 'pdf', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx',
+    // Archives
+    'zip', 'rar', '7z', 'tar', 'gz',
+    // Multimédia
+    'mp3', 'wav', 'flac', 'aac', 'm4a', 'mp4', 'avi', 'mkv', 'mov', 'wmv',
+    // Code
+    'css', 'js', 'json', 'xml', 'csv'
+]);
+define('FORBIDDEN_FILE_TYPES', ['php', 'exe', 'bat', 'cmd', 'com', 'scr', 'vbs', 'ps1']);
+define('UPLOAD_DIR_PERMISSIONS', 0755);
+
 // Types de fichiers supportés pour les icônes
 $SUPPORTED_EXTENSIONS = [
     'txt', 'doc', 'docx', 'pdf', 'rtf',
