@@ -2,11 +2,13 @@
 
 require_once __DIR__ . '/HiddenManager.php';
 require_once __DIR__ . '/TrashManager.php';
+require_once __DIR__ . '/ThumbnailManager.php';
 
 class FileExplorer {
     private $baseDir;
     private $currentDir;
     private $hiddenManager;
+    private $thumbnailManager;
 
     public function __construct($baseDir = '.') {
         $this->baseDir = realpath($baseDir);
@@ -33,6 +35,7 @@ class FileExplorer {
         }
 
         $this->hiddenManager = new HiddenManager($this->baseDir);
+        $this->thumbnailManager = new ThumbnailManager($this->baseDir);
     }
 
     public function getCurrentPath() {
@@ -148,7 +151,7 @@ class FileExplorer {
 
         $icons = [
             'txt' => '📄', 'doc' => '📄', 'docx' => '📄', 'pdf' => '📄',
-            'jpg' => '🖼️', 'jpeg' => '🖼️', 'png' => '🖼️', 'gif' => '🖼️', 'bmp' => '🖼️',
+            'jpg' => '🖼️', 'jpeg' => '🖼️', 'png' => '🖼️', 'gif' => '🖼️', 'bmp' => '🖼️', 'webp' => '🖼️', 'svg' => '🖼️',
             'mp3' => '🎵', 'wav' => '🎵', 'mp4' => '🎬', 'avi' => '🎬', 'mkv' => '🎬',
             'zip' => '📦', 'rar' => '📦', '7z' => '📦',
             'php' => '💻', 'html' => '🌐', 'css' => '🎨', 'js' => '⚡', 'json' => '📋',
@@ -156,6 +159,18 @@ class FileExplorer {
         ];
 
         return $icons[$ext] ?? '📄';
+    }
+
+    public function isImageFile($filePath) {
+        return $this->thumbnailManager->isImageFile($filePath);
+    }
+
+    public function getThumbnailUrl($filePath) {
+        return $this->thumbnailManager->getThumbnailUrl($filePath);
+    }
+
+    public function hasThumbnail($filePath) {
+        return $this->thumbnailManager->isImageFile($filePath);
     }
 
     public function getHiddenManager() {

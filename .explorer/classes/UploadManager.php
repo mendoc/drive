@@ -1,8 +1,11 @@
 <?php
 
+require_once __DIR__ . '/ThumbnailManager.php';
+
 class UploadManager {
     private $uploadDir;
     private $errors = [];
+    private $thumbnailManager;
 
     public function __construct($uploadDirectory = '.') {
         $this->uploadDir = realpath($uploadDirectory);
@@ -14,6 +17,9 @@ class UploadManager {
         if (!is_writable($this->uploadDir)) {
             throw new Exception("Répertoire d'upload non accessible en écriture");
         }
+
+        // Initialiser le gestionnaire de thumbnails
+        $this->thumbnailManager = new ThumbnailManager($this->uploadDir);
     }
 
     public function upload($files, $targetDir = null) {
@@ -80,6 +86,17 @@ class UploadManager {
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
             // Définir les permissions
             chmod($targetPath, 0644);
+
+            // Générer automatiquement le thumbnail si c'est une image
+            if ($this->thumbnailManager->isImageFile($targetPath)) {
+                try {
+                    $this->thumbnailManager->generateThumbnail($targetPath);
+                } catch (Exception $e) {
+                    // En cas d'erreur, on log mais on ne fait pas échouer l'upload
+                    error_log("Erreur génération thumbnail pour {$targetPath}: " . $e->getMessage());
+                }
+            }
+
             return ['success' => true, 'filename' => $filename, 'path' => $targetPath];
         } else {
             $this->errors[] = "Impossible de déplacer le fichier " . $file['name'];

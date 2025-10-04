@@ -147,13 +147,28 @@ php -S localhost:8000
 - **Interface intuitive** : Raccourcis clavier, animations fluides, feedback utilisateur
 - **Handler AJAX dédié** : Action 'rename' avec validation et retour JSON structuré
 
+#### Thumbnails d'images (04/10/2025) ✨
+- **Prévisualisation intelligente** : Affichage de miniatures pour toutes les images (JPG, PNG, GIF, BMP, WebP)
+- **Cache performant** : Stockage persistant dans `.explorer/thumbnails/` avec hash unique par fichier
+- **Génération automatique** : Thumbnails créés pendant l'upload et à la demande lors de l'affichage
+- **Optimisation mémoire** : Taille standardisée 150x150px avec préservation du ratio d'aspect
+- **Interface moderne** : Thumbnails pleine largeur (120px hauteur) dans vue grille, 32x32px en liste
+- **Design épuré** : Suppression du padding pour maximiser l'espace d'aperçu des images
+- **Navigation préservée** : Rechargement intelligent conservant le dossier actuel après upload
+- **Chargement progressif** : Animation de chargement et fallback vers icônes en cas d'erreur
+- **API REST sécurisée** : Endpoint `?action=thumbnail&path=filename` avec validation et headers cache
+- **Performance** : Headers HTTP optimisés (Cache-Control, Expires) pour éviter les rechargements
+- **Détection MIME** : Utilisation du type réel du fichier plutôt que l'extension pour plus de robustesse
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
 - Upload de fichiers testé et fonctionnel ✅
 - Corbeille fonctionnelle testée et opérationnelle ✅
 - Renommage testé et fonctionnel ✅
+- Thumbnails d'images testés et fonctionnels ✅
+- Navigation intelligente après actions testée et fonctionnelle ✅
 
 ---
 *Dernière mise à jour : 2025-10-04*
-*État : Stable et fonctionnel - Fonctionnalité de renommage ajoutée*
+*État : Stable et fonctionnel - Système de thumbnails complet avec interface moderne*

@@ -34,6 +34,14 @@ define('ALLOWED_FILE_TYPES', [
 define('FORBIDDEN_FILE_TYPES', ['php', 'exe', 'bat', 'cmd', 'com', 'scr', 'vbs', 'ps1']);
 define('UPLOAD_DIR_PERMISSIONS', 0755);
 
+// Configuration des thumbnails
+define('THUMBNAIL_SIZE', 150); // Taille maximale en pixels
+define('THUMBNAIL_QUALITY', 85); // Qualité JPEG (0-100)
+define('THUMBNAIL_CACHE_DURATION', 2592000); // 30 jours en secondes
+define('THUMBNAIL_MAX_CACHE_SIZE', 100 * 1024 * 1024); // 100 MB
+define('SUPPORTED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+define('THUMBNAIL_DIR', EXPLORER_DIR . '/thumbnails');
+
 // Types de fichiers supportés pour les icônes
 $SUPPORTED_EXTENSIONS = [
     'txt', 'doc', 'docx', 'pdf', 'rtf',

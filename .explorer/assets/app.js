@@ -100,7 +100,7 @@ function confirmHide() {
             if (data.success) {
                 closeModal();
                 setTimeout(() => {
-                    location.reload();
+                    reloadCurrentDirectory();
                 }, 300);
             }
         })
@@ -247,7 +247,7 @@ function confirmCreateFolder() {
             closeCreateFolderModal();
             // Recharger la page pour voir le nouveau dossier
             setTimeout(() => {
-                location.reload();
+                reloadCurrentDirectory();
             }, 300);
         } else {
             showError(data.error || 'Erreur lors de la création du dossier');
@@ -618,7 +618,8 @@ function handleUploadResponse(response) {
         // Fermer et recharger après 2 secondes
         setTimeout(() => {
             closeUploadModal();
-            location.reload();
+            // Préserver le dossier actuel lors du rechargement
+            reloadCurrentDirectory();
         }, 2000);
     } else {
         handleUploadError(response.error, response.details);
@@ -713,7 +714,7 @@ function confirmMoveToTrash() {
                     showSuccessMessage(data.message);
                 }
                 setTimeout(() => {
-                    location.reload();
+                    reloadCurrentDirectory();
                 }, 1000);
             } else {
                 closeTrashModal();
@@ -952,3 +953,128 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Gestion des thumbnails
+document.addEventListener('DOMContentLoaded', function() {
+    // Délai court pour s'assurer que tous les éléments DOM sont prêts
+    setTimeout(() => {
+        initThumbnails();
+    }, 100);
+});
+
+function initThumbnails() {
+    // Charger les thumbnails pour les images dans la vue grille
+    const gridImages = document.querySelectorAll('.files-grid .file-item[data-path]');
+    gridImages.forEach(item => {
+        const path = item.getAttribute('data-path');
+        if (path && isImageFile(path)) {
+            loadThumbnailForGridItem(item, path);
+        }
+    });
+
+    // Charger les thumbnails pour les images dans la vue liste
+    const listImages = document.querySelectorAll('.files-list .list-item[data-path]');
+    listImages.forEach(item => {
+        const path = item.getAttribute('data-path');
+        if (path && isImageFile(path)) {
+            loadThumbnailForListItem(item, path);
+        }
+    });
+}
+
+function isImageFile(filePath) {
+    const ext = filePath.toLowerCase().split('.').pop();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    return imageExtensions.includes(ext);
+}
+
+function loadThumbnailForGridItem(item, filePath) {
+    const iconElement = item.querySelector('.file-icon');
+    if (!iconElement) return;
+
+    // Ajouter la classe pour indiquer que l'élément a un thumbnail
+    item.classList.add('has-thumbnail');
+
+    // Créer le conteneur thumbnail
+    const thumbnailContainer = document.createElement('div');
+    thumbnailContainer.className = 'file-thumbnail loading';
+
+    // Remplacer l'icône par le conteneur thumbnail
+    iconElement.parentNode.replaceChild(thumbnailContainer, iconElement);
+
+    // Charger l'image
+    const img = new Image();
+    img.onload = function() {
+        thumbnailContainer.classList.remove('loading');
+        thumbnailContainer.innerHTML = '';
+        thumbnailContainer.appendChild(img);
+    };
+
+    img.onerror = function() {
+        thumbnailContainer.classList.remove('loading');
+        thumbnailContainer.classList.add('error');
+        thumbnailContainer.innerHTML = '🖼️';
+        // Retirer la classe si le thumbnail échoue
+        item.classList.remove('has-thumbnail');
+    };
+
+    // Construire l'URL du thumbnail en utilisant le chemin relatif
+    const relativePath = getRelativePath(filePath);
+    img.src = '?action=thumbnail&path=' + encodeURIComponent(relativePath);
+}
+
+function loadThumbnailForListItem(item, filePath) {
+    const iconElement = item.querySelector('.list-icon');
+    if (!iconElement) return;
+
+    // Créer le conteneur thumbnail
+    const thumbnailContainer = document.createElement('div');
+    thumbnailContainer.className = 'list-thumbnail loading';
+
+    // Remplacer l'icône par le conteneur thumbnail
+    iconElement.parentNode.replaceChild(thumbnailContainer, iconElement);
+
+    // Charger l'image
+    const img = new Image();
+    img.onload = function() {
+        thumbnailContainer.classList.remove('loading');
+        thumbnailContainer.innerHTML = '';
+        thumbnailContainer.appendChild(img);
+    };
+
+    img.onerror = function() {
+        thumbnailContainer.classList.remove('loading');
+        thumbnailContainer.classList.add('error');
+        thumbnailContainer.innerHTML = '🖼️';
+    };
+
+    // Construire l'URL du thumbnail en utilisant le chemin relatif
+    const relativePath = getRelativePath(filePath);
+    img.src = '?action=thumbnail&path=' + encodeURIComponent(relativePath);
+}
+
+function getRelativePath(relativePath) {
+    // Le chemin est déjà relatif grâce à la correction dans index.php
+    // Pas besoin de transformation supplémentaire
+    return relativePath;
+}
+
+function reloadCurrentDirectory() {
+    // Récupérer le répertoire actuel depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentDir = urlParams.get('dir');
+
+    // Construire l'URL de rechargement avec le dossier actuel
+    let reloadUrl = window.location.pathname;
+
+    if (currentDir) {
+        reloadUrl += '?dir=' + encodeURIComponent(currentDir);
+    }
+
+    // Ajouter un timestamp pour éviter le cache
+    const separator = currentDir ? '&' : '?';
+    reloadUrl += separator + 't=' + Date.now();
+
+    // Rediriger vers l'URL construite
+    window.location.href = reloadUrl;
+}

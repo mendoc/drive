@@ -6,6 +6,12 @@ require_once '.explorer/includes/config.php';
 require_once '.explorer/includes/handlers.php';
 require_once '.explorer/classes/FileExplorer.php';
 
+// Gestion des requêtes thumbnails
+if (isset($_GET['action']) && $_GET['action'] === 'thumbnail') {
+    handleThumbnailRequest();
+    exit;
+}
+
 // Gestion des requêtes AJAX
 if (handleAjaxRequest()) {
     exit;
@@ -144,7 +150,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                         <div class="files-grid" id="grid-container">
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="file-options" onclick="event.preventDefault(); event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
@@ -165,7 +171,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         <div class="file-name"><?php echo htmlspecialchars($item['name']); ?></div>
                                     </a>
                                 <?php else: ?>
-                                    <div class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <div class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="file-options" onclick="event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
@@ -202,7 +208,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                             </div>
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="list-col list-col-name">
                                             <span class="list-icon"><?php echo $explorer->getFileIcon($item['name'], $item['type']); ?></span>
                                             <span class="list-name"><?php echo htmlspecialchars($item['name']); ?></span>
@@ -228,7 +234,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         </div>
                                     </a>
                                 <?php else: ?>
-                                    <div class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($item['path']); ?>">
+                                    <div class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="list-col list-col-name">
                                             <span class="list-icon"><?php echo $explorer->getFileIcon($item['name'], $item['type']); ?></span>
                                             <span class="list-name"><?php echo htmlspecialchars($item['name']); ?></span>

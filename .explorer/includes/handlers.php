@@ -5,6 +5,7 @@ require_once CLASSES_DIR . '/FileExplorer.php';
 require_once CLASSES_DIR . '/HiddenManager.php';
 require_once CLASSES_DIR . '/UploadManager.php';
 require_once CLASSES_DIR . '/TrashManager.php';
+require_once CLASSES_DIR . '/ThumbnailManager.php';
 
 // Gestion des actions AJAX
 function handleAjaxRequest() {
@@ -269,4 +270,75 @@ function handleRenameAction() {
     }
 
     return true;
+}
+
+// Gestion des requêtes de thumbnail
+function handleThumbnailRequest() {
+    $imagePath = $_GET['path'] ?? '';
+
+    if (empty($imagePath)) {
+        http_response_code(400);
+        echo 'Chemin d\'image manquant';
+        return;
+    }
+
+    try {
+        // Construire le chemin complet sécurisé
+        $baseDir = realpath('.');
+
+        // Normaliser les séparateurs de chemin pour Windows
+        $normalizedPath = str_replace('/', DIRECTORY_SEPARATOR, $imagePath);
+        $fullPath = $baseDir . DIRECTORY_SEPARATOR . $normalizedPath;
+        $realPath = realpath($fullPath);
+
+        // Vérifications de sécurité
+        if (!$realPath || strpos($realPath, $baseDir) !== 0) {
+            http_response_code(403);
+            echo 'Accès interdit';
+            return;
+        }
+
+        if (!file_exists($realPath)) {
+            http_response_code(404);
+            echo 'Fichier non trouvé';
+            return;
+        }
+
+        $thumbnailManager = new ThumbnailManager($baseDir);
+
+        if (!$thumbnailManager->isImageFile($realPath)) {
+            http_response_code(400);
+            echo 'Le fichier n\'est pas une image supportée';
+            return;
+        }
+
+        // Générer ou récupérer le thumbnail
+        $thumbnailPath = $thumbnailManager->generateThumbnail($realPath);
+
+        if (!$thumbnailPath || !file_exists($thumbnailPath)) {
+            http_response_code(500);
+            echo 'Erreur lors de la génération du thumbnail';
+            return;
+        }
+
+        // Définir les headers appropriés
+        $mimeType = 'image/' . pathinfo($thumbnailPath, PATHINFO_EXTENSION);
+        if (pathinfo($thumbnailPath, PATHINFO_EXTENSION) === 'jpg') {
+            $mimeType = 'image/jpeg';
+        }
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($thumbnailPath));
+        header('Cache-Control: public, max-age=2592000'); // Cache 30 jours
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 2592000) . ' GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($thumbnailPath)) . ' GMT');
+
+        // Envoyer le fichier
+        readfile($thumbnailPath);
+
+    } catch (Exception $e) {
+        error_log("Erreur thumbnail: " . $e->getMessage());
+        http_response_code(500);
+        echo 'Erreur serveur';
+    }
 }

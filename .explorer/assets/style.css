@@ -310,6 +310,18 @@ body {
     position: relative;
 }
 
+/* Padding spécial pour les éléments avec thumbnail */
+.file-item.has-thumbnail {
+    padding: 0 0 15px 0;
+}
+
+/* Espacement pour le contenu textuel dans les cartes avec thumbnail */
+.file-item.has-thumbnail .file-name,
+.file-item.has-thumbnail .file-size {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 .file-item:hover {
     background: rgba(0, 120, 212, 0.05);
     border-color: rgba(0, 120, 212, 0.3);
@@ -320,6 +332,45 @@ body {
 .file-icon {
     font-size: 36px;
     margin-bottom: 12px;
+}
+
+.file-thumbnail {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 12px;
+    border: none;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 0;
+}
+
+.file-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+.file-thumbnail.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+.file-thumbnail.error {
+    background: #f8f9fa;
+    color: #666;
+    font-size: 24px;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 .file-name {
@@ -445,6 +496,38 @@ body {
     margin-right: 12px;
     width: 20px;
     text-align: center;
+}
+
+.list-thumbnail {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 3px;
+    margin-right: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+.list-thumbnail.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+.list-thumbnail.error {
+    background: #f8f9fa;
+    color: #666;
+    font-size: 14px;
 }
 
 .list-name {
