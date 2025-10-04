@@ -148,6 +148,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         <div class="file-options" onclick="event.preventDefault(); event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
+                                                <div class="option-item" onclick="showRenameModal('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-edit"></i> Renommer
+                                                </div>
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
@@ -166,6 +169,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         <div class="file-options" onclick="event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
+                                                <div class="option-item" onclick="showRenameModal('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-edit"></i> Renommer
+                                                </div>
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
@@ -209,6 +215,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         <div class="list-options" onclick="event.preventDefault(); event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
+                                                <div class="option-item" onclick="showRenameModal('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-edit"></i> Renommer
+                                                </div>
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
@@ -239,6 +248,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                         <div class="list-options" onclick="event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
+                                                <div class="option-item" onclick="showRenameModal('<?php echo addslashes($item['path']); ?>')">
+                                                    <i class="fas fa-edit"></i> Renommer
+                                                </div>
                                                 <div class="option-item" onclick="hideItem('<?php echo addslashes($item['path']); ?>')">
                                                     <i class="fas fa-eye-slash"></i> Masquer
                                                 </div>
@@ -324,6 +336,28 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                 </button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmMoveToTrash()">
                     <i class="fas fa-trash"></i> Mettre à la corbeille
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de renommage -->
+    <div class="modal-overlay" id="renameModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Renommer</h3>
+            </div>
+            <div class="modal-body">
+                <p>Entrez le nouveau nom :</p>
+                <input type="text" id="renameInput" class="modal-input" placeholder="Nouveau nom" maxlength="255">
+                <div id="renameError" class="modal-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeRenameModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmRename()">
+                    <i class="fas fa-edit"></i> Renommer
                 </button>
             </div>
         </div>

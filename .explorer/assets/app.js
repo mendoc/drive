@@ -136,6 +136,7 @@ document.addEventListener('keydown', function(e) {
         const createFolderModal = document.getElementById('createFolderModal');
         const uploadModal = document.getElementById('uploadModal');
         const trashModal = document.getElementById('trashModal');
+        const renameModal = document.getElementById('renameModal');
 
         if (confirmModal && confirmModal.style.display !== 'none') {
             closeModal();
@@ -145,6 +146,8 @@ document.addEventListener('keydown', function(e) {
             closeUploadModal();
         } else if (trashModal && trashModal.style.display !== 'none') {
             closeTrashModal();
+        } else if (renameModal && renameModal.style.display !== 'none') {
+            closeRenameModal();
         }
     }
 });
@@ -801,6 +804,150 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeTrashModal();
+            }
+        });
+    }
+});
+
+// === FONCTIONNALITÉ RENOMMAGE ===
+
+// Variables globales pour le renommage
+let currentRenamePath = '';
+
+// Afficher la modale de renommage
+function showRenameModal(path) {
+    currentRenamePath = path;
+    const filename = path.split(/[\\\/]/).pop();
+    const input = document.getElementById('renameInput');
+    const errorDiv = document.getElementById('renameError');
+
+    // Pré-remplir avec le nom actuel
+    input.value = filename;
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+
+    const modal = document.getElementById('renameModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+
+    // Focus et sélection du texte (sans l'extension pour les fichiers)
+    setTimeout(() => {
+        input.focus();
+        const dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            input.setSelectionRange(0, dotIndex);
+        } else {
+            input.select();
+        }
+    }, 100);
+}
+
+// Fermer la modale de renommage
+function closeRenameModal() {
+    const modal = document.getElementById('renameModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+        currentRenamePath = '';
+    }, 300);
+}
+
+// Confirmer le renommage
+function confirmRename() {
+    const input = document.getElementById('renameInput');
+    const errorDiv = document.getElementById('renameError');
+    const newName = input.value.trim();
+
+    // Validation côté client
+    if (!newName) {
+        showRenameError('Le nom ne peut pas être vide');
+        return;
+    }
+
+    if (newName.length > 255) {
+        showRenameError('Le nom est trop long (maximum 255 caractères)');
+        return;
+    }
+
+    // Caractères interdits
+    const forbiddenChars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|'];
+    for (let char of forbiddenChars) {
+        if (newName.includes(char)) {
+            showRenameError('Caractères interdits : / \\ : * ? " < > |');
+            return;
+        }
+    }
+
+    // Vérifier si le nom a changé
+    const currentName = currentRenamePath.split(/[\\\/]/).pop();
+    if (newName === currentName) {
+        showRenameError('Le nouveau nom doit être différent');
+        return;
+    }
+
+    // Envoyer la requête de renommage
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=rename&old_path=' + encodeURIComponent(currentRenamePath) + '&new_name=' + encodeURIComponent(newName)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeRenameModal();
+            // Afficher un message de succès
+            if (data.message) {
+                showSuccessMessage(data.message);
+            }
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showRenameError(data.error || 'Erreur lors du renommage');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showRenameError('Erreur de communication avec le serveur');
+    });
+}
+
+// Afficher une erreur dans la modale de renommage
+function showRenameError(message) {
+    const errorDiv = document.getElementById('renameError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+// Gestion de la touche Entrée dans l'input de renommage
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('renameInput');
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmRename();
+            }
+        });
+    }
+});
+
+// Fermer la modale de renommage en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('renameModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRenameModal();
             }
         });
     }

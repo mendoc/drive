@@ -30,6 +30,7 @@
 - **Fichier .hidden** : Stockage persistant des éléments masqués
 - **Corbeille fonctionnelle** : Suppression réversible avec déplacement vers corbeille ✨
 - **Suppression sécurisée** : Protection des fichiers système, gestion des conflits
+- **Renommage de fichiers/dossiers** : Menu contextuel avec modale de saisie et validation ✨
 
 #### Interface moderne
 - **Animations** : Animate.css avec durée 0.3s pour toutes les modales
@@ -37,6 +38,7 @@
 - **Modale de création** : Interface intuitive pour créer des dossiers ✨
 - **Modale d'upload** : Zone drag & drop interactive avec prévisualisation ✨
 - **Modale de corbeille** : Confirmation de suppression avec informations détaillées ✨
+- **Modale de renommage** : Interface intuitive avec pré-remplissage et sélection intelligente ✨
 - **Icônes** : Font Awesome + emojis pour les types de fichiers
 - **Effets hover** : Animations et transitions fluides
 - **Raccourcis clavier** : Entrée pour confirmer, Échap pour annuler
@@ -69,7 +71,7 @@ drive/
 - **FileExplorer** : Navigation, lecture dossiers, formatage, icônes, chemins relatifs
 - **UploadManager** : Upload sécurisé, validation MIME, gestion doublons, noms sécurisés
 - **TrashManager** : Corbeille avec métadonnées, déplacement sécurisé, renommage automatique ✨
-- **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille), validation sécurisée
+- **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille, renommage), validation sécurisée
 
 ### Sécurité
 - **Protection traversal** : Sécurisation contre l'accès aux dossiers parents
@@ -79,16 +81,16 @@ drive/
 - **Types interdits** : Blocage des fichiers exécutables (.php, .exe, .bat, etc.)
 - **Protection système** : Impossible de supprimer les fichiers du framework et système
 - **Corbeille sécurisée** : Métadonnées de restauration, validation des chemins
+- **Renommage sécurisé** : Protection fichiers système, validation noms, gestion conflits
 
 ### Fonctionnalités à développer
 
 #### Prochaines étapes suggérées
 1. **Restaurer depuis la corbeille** : Fonctionnalité pour remettre les éléments à leur place
 2. **Vider la corbeille** : Suppression définitive avec confirmation
-3. **Renommer** : Menu contextuel étendu pour fichiers et dossiers
-4. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
-5. **Aperçu fichiers** : Preview pour images, PDF, texte
-6. **Recherche avancée** : Filtres par type, taille, date
+3. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
+4. **Aperçu fichiers** : Preview pour images, PDF, texte
+5. **Recherche avancée** : Filtres par type, taille, date
 
 ### Notes de développement
 
@@ -136,12 +138,22 @@ php -S localhost:8000
 - **Sécurité avancée** : Protection des fichiers système, gestion des conflits de noms
 - **Architecture modulaire** : Classe TrashManager dédiée et handler AJAX spécialisé
 
+#### Renommage de fichiers/dossiers (04/10/2025) ✨
+- **Menu contextuel étendu** : Option "Renommer" avec icône edit positionnée entre masquer/corbeille
+- **Modale intelligente** : Pré-remplissage du nom actuel avec sélection automatique (sans extension)
+- **Validation complète** : Côté client et serveur avec messages d'erreur détaillés
+- **Sécurité renforcée** : Protection fichiers système, validation caractères interdits
+- **Gestion des conflits** : Vérification noms existants, empêche les doublons
+- **Interface intuitive** : Raccourcis clavier, animations fluides, feedback utilisateur
+- **Handler AJAX dédié** : Action 'rename' avec validation et retour JSON structuré
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
 - Upload de fichiers testé et fonctionnel ✅
 - Corbeille fonctionnelle testée et opérationnelle ✅
+- Renommage testé et fonctionnel ✅
 
 ---
-*Dernière mise à jour : 2025-09-24*
-*État : Stable et fonctionnel - Corbeille fonctionnelle ajoutée*
+*Dernière mise à jour : 2025-10-04*
+*État : Stable et fonctionnel - Fonctionnalité de renommage ajoutée*

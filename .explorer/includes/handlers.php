@@ -21,6 +21,8 @@ function handleAjaxRequest() {
             return handleUploadAction();
         case 'move_to_trash':
             return handleMoveToTrashAction();
+        case 'rename':
+            return handleRenameAction();
         default:
             return false;
     }
@@ -201,6 +203,69 @@ function handleMoveToTrashAction() {
         echo json_encode(['success' => true, 'message' => $message]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+
+    return true;
+}
+
+// Gestion du renommage de fichiers/dossiers
+function handleRenameAction() {
+    $oldPath = $_POST['old_path'] ?? '';
+    $newName = trim($_POST['new_name'] ?? '');
+
+    if (empty($oldPath)) {
+        echo json_encode(['success' => false, 'error' => 'Chemin du fichier manquant']);
+        return true;
+    }
+
+    if (empty($newName)) {
+        echo json_encode(['success' => false, 'error' => 'Le nouveau nom ne peut pas être vide']);
+        return true;
+    }
+
+    // Validation du nouveau nom
+    $validation = validateFilename($newName);
+    if (!$validation['valid']) {
+        echo json_encode(['success' => false, 'error' => $validation['error']]);
+        return true;
+    }
+
+    // Vérifier que le fichier source existe
+    $realOldPath = realpath($oldPath);
+    if (!$realOldPath || !file_exists($realOldPath)) {
+        echo json_encode(['success' => false, 'error' => 'Fichier ou dossier introuvable']);
+        return true;
+    }
+
+    // Vérifier qu'on ne renomme pas des fichiers système
+    if (strpos($realOldPath, '.explorer') !== false ||
+        strpos($realOldPath, 'CLAUDE.md') !== false ||
+        strpos($realOldPath, 'index.php') !== false) {
+        echo json_encode(['success' => false, 'error' => 'Impossible de renommer les fichiers système']);
+        return true;
+    }
+
+    // Construire le nouveau chemin
+    $directory = dirname($realOldPath);
+    $newPath = $directory . DIRECTORY_SEPARATOR . $newName;
+
+    // Vérifier si un fichier avec le nouveau nom existe déjà
+    if (file_exists($newPath)) {
+        echo json_encode(['success' => false, 'error' => 'Un fichier ou dossier avec ce nom existe déjà']);
+        return true;
+    }
+
+    // Effectuer le renommage
+    try {
+        if (rename($realOldPath, $newPath)) {
+            $itemType = is_dir($newPath) ? 'dossier' : 'fichier';
+            $message = ucfirst($itemType) . ' renommé avec succès';
+            echo json_encode(['success' => true, 'message' => $message]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Impossible de renommer le fichier']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Erreur lors du renommage : ' . $e->getMessage()]);
     }
 
     return true;
