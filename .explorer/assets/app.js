@@ -1272,6 +1272,13 @@ function showAddFeedbackModal() {
     errorDiv.style.display = 'none';
     errorDiv.textContent = '';
 
+    // Réinitialiser le bouton d'envoi
+    const submitBtn = modal.querySelector('.modal-btn-confirm');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer';
+    }
+
     modal.style.display = 'flex';
     modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
     modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
@@ -1329,6 +1336,10 @@ function submitFeedback() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Réinitialiser le bouton avant de fermer
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHTML;
+
             // Fermer la modale d'ajout
             const modal = document.getElementById('addFeedbackModal');
             modal.style.display = 'none';
