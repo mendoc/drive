@@ -6,6 +6,7 @@ require_once CLASSES_DIR . '/HiddenManager.php';
 require_once CLASSES_DIR . '/UploadManager.php';
 require_once CLASSES_DIR . '/TrashManager.php';
 require_once CLASSES_DIR . '/ThumbnailManager.php';
+require_once CLASSES_DIR . '/FeedbackManager.php';
 
 // Gestion des actions AJAX
 function handleAjaxRequest() {
@@ -24,6 +25,10 @@ function handleAjaxRequest() {
             return handleMoveToTrashAction();
         case 'rename':
             return handleRenameAction();
+        case 'get_feedbacks':
+            return handleGetFeedbacksAction();
+        case 'add_feedback':
+            return handleAddFeedbackAction();
         default:
             return false;
     }
@@ -341,4 +346,53 @@ function handleThumbnailRequest() {
         http_response_code(500);
         echo 'Erreur serveur';
     }
+}
+
+// Gestion de la récupération des feedbacks
+function handleGetFeedbacksAction() {
+    try {
+        $feedbackManager = new FeedbackManager('.');
+        $feedbacks = $feedbackManager->getAllFeedbacks();
+
+        echo json_encode([
+            'success' => true,
+            'feedbacks' => $feedbacks,
+            'count' => count($feedbacks)
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Erreur lors de la récupération des feedbacks : ' . $e->getMessage()
+        ]);
+    }
+
+    return true;
+}
+
+// Gestion de l'ajout d'un feedback
+function handleAddFeedbackAction() {
+    $message = trim($_POST['message'] ?? '');
+
+    if (empty($message)) {
+        echo json_encode(['success' => false, 'error' => 'Le message ne peut pas être vide']);
+        return true;
+    }
+
+    try {
+        $feedbackManager = new FeedbackManager('.');
+        $feedback = $feedbackManager->addFeedback($message);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Feedback enregistré avec succès',
+            'feedback' => $feedback
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+
+    return true;
 }

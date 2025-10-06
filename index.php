@@ -103,6 +103,10 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                             <?php echo htmlspecialchars($item['name']); ?>
                         </a>
                     <?php endforeach; ?>
+                    <a href="#" class="sidebar-item" onclick="event.preventDefault(); showFeedbacksModal();">
+                        <span class="sidebar-icon">💬</span>
+                        Feedbacks
+                    </a>
                 </div>
                 
                 <div class="sidebar-section">
@@ -432,6 +436,56 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                 </button>
                 <button class="modal-btn modal-btn-confirm" id="uploadBtn" onclick="startUpload()" disabled>
                     <i class="fas fa-upload"></i> Importer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de liste des feedbacks -->
+    <div class="modal-overlay" id="feedbacksModal" style="display: none;">
+        <div class="modal modal-large animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-comments"></i> Feedbacks utilisateurs</h3>
+                <button class="feedback-add-btn" onclick="event.stopPropagation(); showAddFeedbackModal()">
+                    <i class="fas fa-plus"></i> Faire un feedback
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="feedbacksContent">
+                    <div style="text-align: center; padding: 30px; color: #999;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 15px;"></i>
+                        <p>Chargement des feedbacks...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeFeedbacksModal()">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'ajout de feedback -->
+    <div class="modal-overlay" id="addFeedbackModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Nouveau feedback</h3>
+            </div>
+            <div class="modal-body">
+                <p>Partagez vos suggestions, remarques ou idées d'amélioration :</p>
+                <textarea id="feedbackMessage" class="modal-textarea" placeholder="Votre message..." maxlength="500" rows="6"></textarea>
+                <div class="feedback-char-count">
+                    <span id="charCount">0</span>/500 caractères
+                </div>
+                <div id="feedbackError" class="modal-error" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeAddFeedbackModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="submitFeedback()">
+                    <i class="fas fa-paper-plane"></i> Envoyer
                 </button>
             </div>
         </div>

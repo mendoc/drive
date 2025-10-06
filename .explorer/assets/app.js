@@ -1133,3 +1133,278 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// === FONCTIONNALITÉ FEEDBACKS ===
+
+// Afficher la modale de liste des feedbacks
+function showFeedbacksModal() {
+    const modal = document.getElementById('feedbacksModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+
+    // Charger les feedbacks
+    loadFeedbacks();
+}
+
+// Fermer la modale de liste des feedbacks
+function closeFeedbacksModal() {
+    const modal = document.getElementById('feedbacksModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+// Charger les feedbacks depuis le serveur
+function loadFeedbacks() {
+    const contentDiv = document.getElementById('feedbacksContent');
+
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=get_feedbacks'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayFeedbacks(data.feedbacks);
+        } else {
+            contentDiv.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #e53e3e;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 15px;"></i>
+                    <p>Erreur lors du chargement des feedbacks</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        contentDiv.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #e53e3e;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 15px;"></i>
+                <p>Erreur de communication avec le serveur</p>
+            </div>
+        `;
+    });
+}
+
+// Afficher les feedbacks dans la modale
+function displayFeedbacks(feedbacks) {
+    const contentDiv = document.getElementById('feedbacksContent');
+
+    if (feedbacks.length === 0) {
+        contentDiv.innerHTML = `
+            <div style="text-align: center; padding: 50px; color: #999;">
+                <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p style="font-size: 16px; margin-bottom: 10px;">Aucun feedback pour le moment</p>
+                <p style="font-size: 14px;">Soyez le premier à partager vos remarques !</p>
+            </div>
+        `;
+        return;
+    }
+
+    let tableHTML = `
+        <div class="feedbacks-table">
+            <div class="feedbacks-header">
+                <div class="feedback-col-date">Date</div>
+                <div class="feedback-col-message">Message</div>
+            </div>
+            <div class="feedbacks-body">
+    `;
+
+    feedbacks.forEach(feedback => {
+        const date = formatFeedbackDate(feedback.created_at);
+        const message = feedback.message || '';
+
+        tableHTML += `
+            <div class="feedback-row">
+                <div class="feedback-col-date">${date}</div>
+                <div class="feedback-col-message">${message}</div>
+            </div>
+        `;
+    });
+
+    tableHTML += `
+            </div>
+        </div>
+    `;
+
+    contentDiv.innerHTML = tableHTML;
+}
+
+// Formater la date du feedback
+function formatFeedbackDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year} à ${hours}:${minutes}`;
+}
+
+// Afficher la modale d'ajout de feedback
+function showAddFeedbackModal() {
+    // Fermer la modale de liste
+    const feedbacksModal = document.getElementById('feedbacksModal');
+    feedbacksModal.style.display = 'none';
+
+    // Ouvrir la modale d'ajout
+    const modal = document.getElementById('addFeedbackModal');
+    const modalContent = modal.querySelector('.modal');
+    const textarea = document.getElementById('feedbackMessage');
+    const errorDiv = document.getElementById('feedbackError');
+    const charCount = document.getElementById('charCount');
+
+    // Réinitialiser le formulaire
+    textarea.value = '';
+    charCount.textContent = '0';
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+
+    // Focus sur le textarea
+    setTimeout(() => textarea.focus(), 100);
+}
+
+// Fermer la modale d'ajout de feedback
+function closeAddFeedbackModal() {
+    const modal = document.getElementById('addFeedbackModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+        // Réouvrir la modale de liste
+        showFeedbacksModal();
+    }, 300);
+}
+
+// Soumettre le feedback
+function submitFeedback() {
+    const textarea = document.getElementById('feedbackMessage');
+    const errorDiv = document.getElementById('feedbackError');
+    const message = textarea.value.trim();
+
+    // Validation côté client
+    if (!message) {
+        showFeedbackError('Le message ne peut pas être vide');
+        return;
+    }
+
+    if (message.length > 500) {
+        showFeedbackError('Le message est trop long (maximum 500 caractères)');
+        return;
+    }
+
+    // Désactiver le bouton pendant l'envoi
+    const submitBtn = event.target;
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+    // Envoyer le feedback
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=add_feedback&message=' + encodeURIComponent(message)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Fermer la modale d'ajout
+            const modal = document.getElementById('addFeedbackModal');
+            modal.style.display = 'none';
+
+            // Afficher un message de succès
+            showSuccessMessage(data.message || 'Feedback enregistré avec succès');
+
+            // Recharger et afficher la liste des feedbacks
+            setTimeout(() => {
+                showFeedbacksModal();
+            }, 500);
+        } else {
+            showFeedbackError(data.error || 'Erreur lors de l\'envoi du feedback');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHTML;
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showFeedbackError('Erreur de communication avec le serveur');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHTML;
+    });
+}
+
+// Afficher une erreur dans la modale d'ajout
+function showFeedbackError(message) {
+    const errorDiv = document.getElementById('feedbackError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+// Compteur de caractères pour le textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('feedbackMessage');
+    const charCount = document.getElementById('charCount');
+
+    if (textarea && charCount) {
+        textarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    }
+});
+
+// Fermer les modales de feedback en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const feedbacksModal = document.getElementById('feedbacksModal');
+    const addFeedbackModal = document.getElementById('addFeedbackModal');
+
+    if (feedbacksModal) {
+        feedbacksModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedbacksModal();
+            }
+        });
+    }
+
+    if (addFeedbackModal) {
+        addFeedbackModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddFeedbackModal();
+            }
+        });
+    }
+});
+
+// Gérer la touche Échap pour les modales de feedback
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const feedbacksModal = document.getElementById('feedbacksModal');
+        const addFeedbackModal = document.getElementById('addFeedbackModal');
+
+        if (feedbacksModal && feedbacksModal.style.display !== 'none') {
+            closeFeedbacksModal();
+        } else if (addFeedbackModal && addFeedbackModal.style.display !== 'none') {
+            closeAddFeedbackModal();
+        }
+    }
+});
