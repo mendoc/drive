@@ -68,8 +68,8 @@ drive/
 ```
 
 #### Classes PHP
-- **HiddenManager** : Gestion du fichier .hidden et filtrage
-- **FileExplorer** : Navigation, lecture dossiers, formatage, icônes, chemins relatifs
+- **HiddenManager** : Gestion du fichier .hidden et filtrage, protection automatique des fichiers système
+- **FileExplorer** : Navigation, lecture dossiers, formatage, icônes, chemins relatifs, détection dossiers vides
 - **UploadManager** : Upload sécurisé, validation MIME, gestion doublons, noms sécurisés
 - **TrashManager** : Corbeille avec métadonnées, déplacement sécurisé, renommage automatique ✨
 - **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille, renommage), validation sécurisée
@@ -83,6 +83,7 @@ drive/
 - **Protection système** : Impossible de supprimer les fichiers du framework et système
 - **Corbeille sécurisée** : Métadonnées de restauration, validation des chemins
 - **Renommage sécurisé** : Protection fichiers système, validation noms, gestion conflits
+- **Fichiers système protégés** : Masquage automatique de index.php, CLAUDE.md, OngouaSync.php ✨
 
 ### Fonctionnalités à développer
 
@@ -171,6 +172,15 @@ php -S localhost:8000
 - **Comptage intelligent** : Ne compte que les fichiers/dossiers non masqués pour déterminer si vide
 - **Performance** : Vérification effectuée côté serveur lors du chargement du répertoire
 
+#### Protection automatique des fichiers système (06/10/2025) ✨
+- **Masquage automatique** : Liste de fichiers système cachés dès l'installation sans intervention utilisateur
+- **Fichiers protégés** : index.php, CLAUDE.md, OngouaSync.php masqués automatiquement à la racine
+- **Protection permanente** : Impossible de révéler ces fichiers via l'interface utilisateur
+- **Indépendant du fichier .hidden** : Gestion par constante PHP dans HiddenManager
+- **Sécurité renforcée** : Empêche la suppression accidentelle des fichiers critiques du système
+- **Vérification de localisation** : Seuls les fichiers à la racine du projet sont masqués automatiquement
+- **Extensibilité** : Ajout facile de nouveaux fichiers système via la constante SYSTEM_FILES
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
@@ -180,7 +190,8 @@ php -S localhost:8000
 - Thumbnails d'images testés et fonctionnels ✅
 - Navigation intelligente après actions testée et fonctionnelle ✅
 - Distinction visuelle dossiers vides testée et fonctionnelle ✅
+- Protection automatique fichiers système testée et fonctionnelle ✅
 
 ---
 *Dernière mise à jour : 2025-10-06*
-*État : Stable et fonctionnel - Distinction visuelle des dossiers vides implémentée*
+*État : Stable et fonctionnel - Protection automatique des fichiers système implémentée*
