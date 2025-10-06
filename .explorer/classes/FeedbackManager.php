@@ -39,7 +39,8 @@ class FeedbackManager {
             'id' => $this->generateUniqueId(),
             'message' => htmlspecialchars($message, ENT_QUOTES, 'UTF-8'),
             'created_at' => date('Y-m-d H:i:s'),
-            'timestamp' => time()
+            'timestamp' => time(),
+            'completed' => false
         ];
 
         array_unshift($feedbacks, $newFeedback);
@@ -101,5 +102,39 @@ class FeedbackManager {
         $this->saveFeedbacks($feedbacks);
 
         return true;
+    }
+
+    public function toggleFeedbackStatus($feedbackId) {
+        if (empty($feedbackId)) {
+            throw new Exception('L\'ID du feedback est requis');
+        }
+
+        $feedbacks = $this->loadFeedbacks();
+        $found = false;
+        $newStatus = false;
+
+        // Trouver et toggle le statut du feedback
+        foreach ($feedbacks as &$feedback) {
+            if ($feedback['id'] === $feedbackId) {
+                // Si le champ completed n'existe pas, le créer à true (rétrocompatibilité)
+                if (!isset($feedback['completed'])) {
+                    $feedback['completed'] = true;
+                } else {
+                    // Sinon, toggle le statut
+                    $feedback['completed'] = !$feedback['completed'];
+                }
+                $newStatus = $feedback['completed'];
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            throw new Exception('Feedback introuvable');
+        }
+
+        $this->saveFeedbacks($feedbacks);
+
+        return $newStatus;
     }
 }

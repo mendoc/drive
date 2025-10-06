@@ -1227,12 +1227,19 @@ function displayFeedbacks(feedbacks) {
         const message = feedback.message || '';
         const feedbackId = feedback.id || '';
         const messagePreview = message.length > 60 ? message.substring(0, 60) + '...' : message;
+        const isCompleted = feedback.completed || false;
+        const completedClass = isCompleted ? 'completed' : '';
+        const checkIcon = isCompleted ? 'fa-check-circle' : 'fa-circle';
+        const checkClass = isCompleted ? 'completed' : '';
 
         tableHTML += `
-            <div class="feedback-row">
-                <div class="feedback-col-date">${date}</div>
-                <div class="feedback-col-message">${message}</div>
+            <div class="feedback-row ${completedClass}" data-feedback-id="${feedbackId}">
+                <div class="feedback-col-date ${completedClass}">${date}</div>
+                <div class="feedback-col-message ${completedClass}">${message}</div>
                 <div class="feedback-col-actions">
+                    <button class="feedback-toggle-btn ${checkClass}" onclick="toggleFeedbackStatus('${feedbackId}');" title="${isCompleted ? 'Marquer comme non traité' : 'Marquer comme traité'}">
+                        <i class="fas ${checkIcon}"></i>
+                    </button>
                     <button class="feedback-delete-btn" onclick="showDeleteFeedbackModal('${feedbackId}', '${messagePreview.replace(/'/g, "\\'")}');" title="Supprimer">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -1533,3 +1540,108 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// === TOGGLE STATUT FEEDBACK ===
+
+// Toggle le statut d'un feedback (traité/non traité)
+function toggleFeedbackStatus(feedbackId) {
+    if (!feedbackId) {
+        return;
+    }
+
+    // Trouver la ligne du feedback
+    const feedbackRow = document.querySelector(`.feedback-row[data-feedback-id="${feedbackId}"]`);
+    if (!feedbackRow) {
+        return;
+    }
+
+    // Trouver le bouton toggle
+    const toggleBtn = feedbackRow.querySelector('.feedback-toggle-btn');
+    const toggleIcon = toggleBtn ? toggleBtn.querySelector('i') : null;
+
+    // Sauvegarder l'état actuel pour pouvoir revert en cas d'erreur
+    const wasCompleted = feedbackRow.classList.contains('completed');
+
+    // Mise à jour visuelle optimiste
+    feedbackRow.classList.toggle('completed');
+    const dateCol = feedbackRow.querySelector('.feedback-col-date');
+    const messageCol = feedbackRow.querySelector('.feedback-col-message');
+
+    if (dateCol) dateCol.classList.toggle('completed');
+    if (messageCol) messageCol.classList.toggle('completed');
+
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('completed');
+        if (toggleIcon) {
+            if (feedbackRow.classList.contains('completed')) {
+                toggleIcon.classList.remove('fa-circle');
+                toggleIcon.classList.add('fa-check-circle');
+                toggleBtn.setAttribute('title', 'Marquer comme non traité');
+            } else {
+                toggleIcon.classList.remove('fa-check-circle');
+                toggleIcon.classList.add('fa-circle');
+                toggleBtn.setAttribute('title', 'Marquer comme traité');
+            }
+        }
+    }
+
+    // Envoyer la requête AJAX
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=toggle_feedback_status&feedback_id=' + encodeURIComponent(feedbackId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            // En cas d'erreur, revert l'état visuel
+            feedbackRow.classList.toggle('completed');
+            if (dateCol) dateCol.classList.toggle('completed');
+            if (messageCol) messageCol.classList.toggle('completed');
+
+            if (toggleBtn) {
+                toggleBtn.classList.toggle('completed');
+                if (toggleIcon) {
+                    if (wasCompleted) {
+                        toggleIcon.classList.remove('fa-circle');
+                        toggleIcon.classList.add('fa-check-circle');
+                        toggleBtn.setAttribute('title', 'Marquer comme non traité');
+                    } else {
+                        toggleIcon.classList.remove('fa-check-circle');
+                        toggleIcon.classList.add('fa-circle');
+                        toggleBtn.setAttribute('title', 'Marquer comme traité');
+                    }
+                }
+            }
+
+            showErrorMessage(data.error || 'Erreur lors du changement de statut');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+
+        // Revert l'état visuel
+        feedbackRow.classList.toggle('completed');
+        if (dateCol) dateCol.classList.toggle('completed');
+        if (messageCol) messageCol.classList.toggle('completed');
+
+        if (toggleBtn) {
+            toggleBtn.classList.toggle('completed');
+            if (toggleIcon) {
+                if (wasCompleted) {
+                    toggleIcon.classList.remove('fa-circle');
+                    toggleIcon.classList.add('fa-check-circle');
+                    toggleBtn.setAttribute('title', 'Marquer comme non traité');
+                } else {
+                    toggleIcon.classList.remove('fa-check-circle');
+                    toggleIcon.classList.add('fa-circle');
+                    toggleBtn.setAttribute('title', 'Marquer comme traité');
+                }
+            }
+        }
+
+        showErrorMessage('Erreur de communication avec le serveur');
+    });
+}

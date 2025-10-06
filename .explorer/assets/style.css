@@ -1256,8 +1256,37 @@ body {
 }
 
 .feedback-col-actions {
-    width: 80px;
+    width: 120px;
     text-align: center;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.feedback-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.feedback-toggle-btn:hover {
+    background: rgba(108, 117, 125, 0.1);
+    color: #495057;
+    transform: scale(1.1);
+}
+
+.feedback-toggle-btn.completed {
+    color: #28a745;
+}
+
+.feedback-toggle-btn.completed:hover {
+    background: rgba(40, 167, 69, 0.1);
+    color: #218838;
 }
 
 .feedback-delete-btn {
@@ -1275,6 +1304,18 @@ body {
     background: rgba(220, 53, 69, 0.1);
     color: #c82333;
     transform: scale(1.1);
+}
+
+/* Styles pour les feedbacks complétés */
+.feedback-row.completed .feedback-col-message {
+    text-decoration: line-through;
+    opacity: 0.6;
+    color: #6c757d;
+}
+
+.feedback-row.completed .feedback-col-date {
+    opacity: 0.6;
+    color: #6c757d;
 }
 
 /* Textarea pour le feedback */
@@ -1347,6 +1388,7 @@ body {
     .feedback-col-actions {
         width: 100%;
         text-align: left;
+        justify-content: flex-start;
     }
 
     .feedbacks-body {

@@ -31,6 +31,8 @@ function handleAjaxRequest() {
             return handleAddFeedbackAction();
         case 'delete_feedback':
             return handleDeleteFeedbackAction();
+        case 'toggle_feedback_status':
+            return handleToggleFeedbackStatusAction();
         default:
             return false;
     }
@@ -415,6 +417,34 @@ function handleDeleteFeedbackAction() {
         echo json_encode([
             'success' => true,
             'message' => 'Feedback supprimé avec succès'
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+
+    return true;
+}
+
+// Gestion du toggle du statut d'un feedback
+function handleToggleFeedbackStatusAction() {
+    $feedbackId = trim($_POST['feedback_id'] ?? '');
+
+    if (empty($feedbackId)) {
+        echo json_encode(['success' => false, 'error' => 'ID du feedback manquant']);
+        return true;
+    }
+
+    try {
+        $feedbackManager = new FeedbackManager('.');
+        $newStatus = $feedbackManager->toggleFeedbackStatus($feedbackId);
+
+        echo json_encode([
+            'success' => true,
+            'completed' => $newStatus,
+            'message' => $newStatus ? 'Feedback marqué comme traité' : 'Feedback marqué comme non traité'
         ]);
     } catch (Exception $e) {
         echo json_encode([
