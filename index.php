@@ -491,6 +491,30 @@ $breadcrumbs = $explorer->getBreadcrumbs();
         </div>
     </div>
 
+    <!-- Modale de confirmation de suppression de feedback -->
+    <div class="modal-overlay" id="deleteFeedbackModal" style="display: none;">
+        <div class="modal animate__animated">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash"></i> Supprimer le feedback</h3>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer ce feedback ?</p>
+                <p class="modal-filename" id="feedbackPreview"></p>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i> Cette action est irréversible.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteFeedbackModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDeleteFeedback()">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src=".explorer/assets/app.js"></script>
 </body>
 </html>

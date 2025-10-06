@@ -1255,6 +1255,28 @@ body {
     word-wrap: break-word;
 }
 
+.feedback-col-actions {
+    width: 80px;
+    text-align: center;
+}
+
+.feedback-delete-btn {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.feedback-delete-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #c82333;
+    transform: scale(1.1);
+}
+
 /* Textarea pour le feedback */
 .modal-textarea {
     width: 100%;
@@ -1319,6 +1341,12 @@ body {
 
     .feedback-col-message {
         font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .feedback-col-actions {
+        width: 100%;
+        text-align: left;
     }
 
     .feedbacks-body {

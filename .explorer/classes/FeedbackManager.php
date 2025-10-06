@@ -79,4 +79,27 @@ class FeedbackManager {
         $feedbacks = $this->loadFeedbacks();
         return count($feedbacks);
     }
+
+    public function deleteFeedback($feedbackId) {
+        if (empty($feedbackId)) {
+            throw new Exception('L\'ID du feedback est requis');
+        }
+
+        $feedbacks = $this->loadFeedbacks();
+        $initialCount = count($feedbacks);
+
+        // Filtrer pour exclure le feedback avec l'ID correspondant
+        $feedbacks = array_values(array_filter($feedbacks, function($feedback) use ($feedbackId) {
+            return $feedback['id'] !== $feedbackId;
+        }));
+
+        // Vérifier si un feedback a été supprimé
+        if (count($feedbacks) === $initialCount) {
+            throw new Exception('Feedback introuvable');
+        }
+
+        $this->saveFeedbacks($feedbacks);
+
+        return true;
+    }
 }

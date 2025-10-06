@@ -1217,6 +1217,7 @@ function displayFeedbacks(feedbacks) {
             <div class="feedbacks-header">
                 <div class="feedback-col-date">Date</div>
                 <div class="feedback-col-message">Message</div>
+                <div class="feedback-col-actions">Actions</div>
             </div>
             <div class="feedbacks-body">
     `;
@@ -1224,11 +1225,18 @@ function displayFeedbacks(feedbacks) {
     feedbacks.forEach(feedback => {
         const date = formatFeedbackDate(feedback.created_at);
         const message = feedback.message || '';
+        const feedbackId = feedback.id || '';
+        const messagePreview = message.length > 60 ? message.substring(0, 60) + '...' : message;
 
         tableHTML += `
             <div class="feedback-row">
                 <div class="feedback-col-date">${date}</div>
                 <div class="feedback-col-message">${message}</div>
+                <div class="feedback-col-actions">
+                    <button class="feedback-delete-btn" onclick="showDeleteFeedbackModal('${feedbackId}', '${messagePreview.replace(/'/g, "\\'")}');" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
         `;
     });
@@ -1411,11 +1419,117 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const feedbacksModal = document.getElementById('feedbacksModal');
         const addFeedbackModal = document.getElementById('addFeedbackModal');
+        const deleteFeedbackModal = document.getElementById('deleteFeedbackModal');
 
         if (feedbacksModal && feedbacksModal.style.display !== 'none') {
             closeFeedbacksModal();
         } else if (addFeedbackModal && addFeedbackModal.style.display !== 'none') {
             closeAddFeedbackModal();
+        } else if (deleteFeedbackModal && deleteFeedbackModal.style.display !== 'none') {
+            closeDeleteFeedbackModal();
         }
+    }
+});
+
+// === SUPPRESSION DE FEEDBACKS ===
+
+// Variable globale pour stocker l'ID du feedback à supprimer
+let currentDeleteFeedbackId = '';
+
+// Afficher la modale de confirmation de suppression
+function showDeleteFeedbackModal(feedbackId, messagePreview) {
+    currentDeleteFeedbackId = feedbackId;
+
+    // Afficher un aperçu du message
+    const previewElement = document.getElementById('feedbackPreview');
+    previewElement.textContent = messagePreview;
+
+    const modal = document.getElementById('deleteFeedbackModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modal.style.display = 'flex';
+    modalContent.classList.remove('animate__fadeOut', 'animate__zoomOut');
+    modalContent.classList.add('animate__fadeIn', 'animate__zoomIn');
+}
+
+// Fermer la modale de confirmation de suppression
+function closeDeleteFeedbackModal() {
+    const modal = document.getElementById('deleteFeedbackModal');
+    const modalContent = modal.querySelector('.modal');
+
+    modalContent.classList.remove('animate__fadeIn', 'animate__zoomIn');
+    modalContent.classList.add('animate__fadeOut', 'animate__zoomOut');
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+        currentDeleteFeedbackId = '';
+    }, 300);
+}
+
+// Confirmer la suppression du feedback
+function confirmDeleteFeedback() {
+    if (!currentDeleteFeedbackId) {
+        return;
+    }
+
+    // Désactiver le bouton pendant la suppression
+    const confirmBtn = event.target;
+    const originalHTML = confirmBtn.innerHTML;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=delete_feedback&feedback_id=' + encodeURIComponent(currentDeleteFeedbackId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Réinitialiser le bouton
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalHTML;
+
+            // Fermer la modale
+            closeDeleteFeedbackModal();
+
+            // Afficher un message de succès
+            showSuccessMessage(data.message || 'Feedback supprimé avec succès');
+
+            // Recharger la liste des feedbacks après un court délai
+            setTimeout(() => {
+                loadFeedbacks();
+            }, 500);
+        } else {
+            // Réinitialiser le bouton
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalHTML;
+
+            // Afficher l'erreur
+            closeDeleteFeedbackModal();
+            showErrorMessage(data.error || 'Erreur lors de la suppression');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalHTML;
+        closeDeleteFeedbackModal();
+        showErrorMessage('Erreur de communication avec le serveur');
+    });
+}
+
+// Fermer la modale de suppression en cliquant sur l'overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteFeedbackModal = document.getElementById('deleteFeedbackModal');
+
+    if (deleteFeedbackModal) {
+        deleteFeedbackModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteFeedbackModal();
+            }
+        });
     }
 });

@@ -29,6 +29,8 @@ function handleAjaxRequest() {
             return handleGetFeedbacksAction();
         case 'add_feedback':
             return handleAddFeedbackAction();
+        case 'delete_feedback':
+            return handleDeleteFeedbackAction();
         default:
             return false;
     }
@@ -386,6 +388,33 @@ function handleAddFeedbackAction() {
             'success' => true,
             'message' => 'Feedback enregistré avec succès',
             'feedback' => $feedback
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+
+    return true;
+}
+
+// Gestion de la suppression d'un feedback
+function handleDeleteFeedbackAction() {
+    $feedbackId = trim($_POST['feedback_id'] ?? '');
+
+    if (empty($feedbackId)) {
+        echo json_encode(['success' => false, 'error' => 'ID du feedback manquant']);
+        return true;
+    }
+
+    try {
+        $feedbackManager = new FeedbackManager('.');
+        $feedbackManager->deleteFeedback($feedbackId);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Feedback supprimé avec succès'
         ]);
     } catch (Exception $e) {
         echo json_encode([
