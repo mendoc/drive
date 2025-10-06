@@ -386,8 +386,29 @@ body {
     margin-top: 4px;
 }
 
+.folder-empty-label {
+    font-size: 10px;
+    color: #999;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 .directory {
     color: #0078d4;
+}
+
+/* Dossiers vides - Vue grille */
+.file-item.empty-folder .file-icon {
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+.file-item.empty-folder .file-name {
+    color: #999;
+}
+
+.file-item.empty-folder:hover .file-icon {
+    opacity: 0.6;
 }
 
 .view-controls {
@@ -532,6 +553,26 @@ body {
 
 .list-name {
     flex: 1;
+}
+
+/* Dossiers vides - Vue liste */
+.list-item.empty-folder .list-icon {
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+.list-item.empty-folder .list-thumbnail {
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+.list-item.empty-folder .list-name {
+    color: #999;
+}
+
+.list-item.empty-folder:hover .list-icon,
+.list-item.empty-folder:hover .list-thumbnail {
+    opacity: 0.6;
 }
 
 /* Menu contextuel */

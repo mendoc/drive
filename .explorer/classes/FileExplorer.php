@@ -107,7 +107,8 @@ class FileExplorer {
                         'type' => 'directory',
                         'path' => $fullPath,
                         'size' => '',
-                        'modified' => filemtime($fullPath)
+                        'modified' => filemtime($fullPath),
+                        'isEmpty' => $this->isDirectoryEmpty($fullPath)
                     ];
                 } else {
                     $items[] = [
@@ -199,5 +200,25 @@ class FileExplorer {
         // Sur Windows : C:\... ou sur Unix : /...
         return (DIRECTORY_SEPARATOR === '\\' && preg_match('/^[A-Za-z]:/', $path)) ||
                (DIRECTORY_SEPARATOR === '/' && strpos($path, '/') === 0);
+    }
+
+    private function isDirectoryEmpty($dirPath) {
+        if (!is_readable($dirPath)) {
+            return true;
+        }
+
+        $files = scandir($dirPath);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+
+            $fullPath = $dirPath . DIRECTORY_SEPARATOR . $file;
+
+            // Ne compter que les éléments visibles (non cachés)
+            if (!$this->hiddenManager->isHidden($fullPath)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

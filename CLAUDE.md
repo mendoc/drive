@@ -31,6 +31,7 @@
 - **Corbeille fonctionnelle** : Suppression réversible avec déplacement vers corbeille ✨
 - **Suppression sécurisée** : Protection des fichiers système, gestion des conflits
 - **Renommage de fichiers/dossiers** : Menu contextuel avec modale de saisie et validation ✨
+- **Distinction dossiers vides** : Indication visuelle des dossiers vides en vue grille et liste ✨
 
 #### Interface moderne
 - **Animations** : Animate.css avec durée 0.3s pour toutes les modales
@@ -110,10 +111,11 @@ php -S localhost:8000
 // Format des éléments de fichiers/dossiers
 [
     'name' => 'nom_fichier',
-    'type' => 'file|directory', 
+    'type' => 'file|directory',
     'path' => '/chemin/complet',
     'size' => 123456, // bytes pour files, '' pour directories
-    'modified' => 1640995200 // timestamp
+    'modified' => 1640995200, // timestamp
+    'isEmpty' => true // pour directories, indique si le dossier est vide
 ]
 ```
 
@@ -160,6 +162,15 @@ php -S localhost:8000
 - **Performance** : Headers HTTP optimisés (Cache-Control, Expires) pour éviter les rechargements
 - **Détection MIME** : Utilisation du type réel du fichier plutôt que l'extension pour plus de robustesse
 
+#### Distinction visuelle des dossiers vides (06/10/2025) ✨
+- **Détection automatique** : Méthode `isDirectoryEmpty()` qui vérifie si un dossier contient des éléments visibles
+- **Vue grille** : Label "vide" en petit texte gris italique sous le nom du dossier
+- **Icônes grisées** : Opacité réduite (40%) et filtre grayscale pour les dossiers vides
+- **Vue liste** : Nom et icône grisés pour une distinction subtile mais claire
+- **Effet hover** : Augmentation légère de l'opacité (60%) au survol pour garder l'interactivité
+- **Comptage intelligent** : Ne compte que les fichiers/dossiers non masqués pour déterminer si vide
+- **Performance** : Vérification effectuée côté serveur lors du chargement du répertoire
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
@@ -168,7 +179,8 @@ php -S localhost:8000
 - Renommage testé et fonctionnel ✅
 - Thumbnails d'images testés et fonctionnels ✅
 - Navigation intelligente après actions testée et fonctionnelle ✅
+- Distinction visuelle dossiers vides testée et fonctionnelle ✅
 
 ---
-*Dernière mise à jour : 2025-10-04*
-*État : Stable et fonctionnel - Système de thumbnails complet avec interface moderne*
+*Dernière mise à jour : 2025-10-06*
+*État : Stable et fonctionnel - Distinction visuelle des dossiers vides implémentée*

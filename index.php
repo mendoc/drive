@@ -150,7 +150,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                         <div class="files-grid" id="grid-container">
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="file-item <?php echo $item['type']; ?> <?php echo (!empty($item['isEmpty'])) ? 'empty-folder' : ''; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="file-options" onclick="event.preventDefault(); event.stopPropagation(); toggleMenu(this);">
                                             <i class="fas fa-ellipsis-h"></i>
                                             <div class="options-menu">
@@ -169,6 +169,9 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                                             <?php echo $explorer->getFileIcon($item['name'], $item['type']); ?>
                                         </div>
                                         <div class="file-name"><?php echo htmlspecialchars($item['name']); ?></div>
+                                        <?php if (!empty($item['isEmpty'])): ?>
+                                            <div class="folder-empty-label">vide</div>
+                                        <?php endif; ?>
                                     </a>
                                 <?php else: ?>
                                     <div class="file-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
@@ -208,7 +211,7 @@ $breadcrumbs = $explorer->getBreadcrumbs();
                             </div>
                             <?php foreach ($items as $item): ?>
                                 <?php if ($item['type'] === 'directory'): ?>
-                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="list-item <?php echo $item['type']; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
+                                    <a href="?dir=<?php echo urlencode($explorer->getRelativePath($item['path'])); ?>" class="list-item <?php echo $item['type']; ?> <?php echo (!empty($item['isEmpty'])) ? 'empty-folder' : ''; ?>" data-path="<?php echo htmlspecialchars($explorer->getRelativePath($item['path'])); ?>">
                                         <div class="list-col list-col-name">
                                             <span class="list-icon"><?php echo $explorer->getFileIcon($item['name'], $item['type']); ?></span>
                                             <span class="list-name"><?php echo htmlspecialchars($item['name']); ?></span>
