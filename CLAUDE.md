@@ -9,6 +9,7 @@
 - **Barre d'outils** : Navigation (précédent/suivant/actualiser), bouton "Nouveau dossier", vue grille/liste, recherche
 - **Barre latérale** : Favoris (Desktop, Downloads, etc.) et informations disque
 - **Vue responsive** : S'adapte aux écrans mobiles
+- **Raccourcissement des noms** : Noms longs tronqués intelligemment avec tooltip ✨
 
 #### Navigation
 - **Breadcrumb cliquable** : Navigation par chemin relatif dans la barre d'adresse
@@ -181,6 +182,15 @@ php -S localhost:8000
 - **Vérification de localisation** : Seuls les fichiers à la racine du projet sont masqués automatiquement
 - **Extensibilité** : Ajout facile de nouveaux fichiers système via la constante SYSTEM_FILES
 
+#### Raccourcissement intelligent des noms (06/10/2025) ✨
+- **Troncature automatique** : Noms de fichiers/dossiers trop longs raccourcis automatiquement
+- **Vue grille** : Limite de 30 caractères avec format "début...fin.extension"
+- **Vue liste** : Limite de 40 caractères avec même format intelligent
+- **Préservation extension** : L'extension du fichier est toujours visible
+- **Tooltip complet** : Attribut `title` affiche le nom complet au survol
+- **Algorithme équilibré** : Découpage équitable entre début et fin du nom (sans l'extension)
+- **Fonction JavaScript** : `truncateFileName()` réutilisable et modulaire
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
@@ -191,7 +201,8 @@ php -S localhost:8000
 - Navigation intelligente après actions testée et fonctionnelle ✅
 - Distinction visuelle dossiers vides testée et fonctionnelle ✅
 - Protection automatique fichiers système testée et fonctionnelle ✅
+- Raccourcissement intelligent des noms testé et fonctionnel ✅
 
 ---
 *Dernière mise à jour : 2025-10-06*
-*État : Stable et fonctionnel - Protection automatique des fichiers système implémentée*
+*État : Stable et fonctionnel - Raccourcissement intelligent des noms longs implémenté*

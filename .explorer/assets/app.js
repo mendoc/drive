@@ -1,5 +1,39 @@
 // Explorateur de fichiers PHP - JavaScript principal
 
+// Fonction pour raccourcir les noms de fichiers trop longs
+function truncateFileName(filename, maxLength) {
+    if (filename.length <= maxLength) {
+        return filename;
+    }
+
+    // Séparer le nom et l'extension
+    const lastDotIndex = filename.lastIndexOf('.');
+    let name = filename;
+    let extension = '';
+
+    if (lastDotIndex > 0) {
+        name = filename.substring(0, lastDotIndex);
+        extension = filename.substring(lastDotIndex);
+    }
+
+    // Calculer combien de caractères on peut garder
+    const availableLength = maxLength - 3 - extension.length; // 3 pour "..."
+
+    if (availableLength <= 0) {
+        // Si même avec "..." ça ne rentre pas, couper brutalement
+        return filename.substring(0, maxLength - 3) + '...';
+    }
+
+    // Diviser équitablement entre le début et la fin
+    const startLength = Math.ceil(availableLength / 2);
+    const endLength = Math.floor(availableLength / 2);
+
+    const start = name.substring(0, startLength);
+    const end = name.substring(name.length - endLength);
+
+    return start + '...' + end + extension;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const gridBtn = document.getElementById('grid-view');
     const listBtn = document.getElementById('list-view');
@@ -1078,3 +1112,24 @@ function reloadCurrentDirectory() {
     // Rediriger vers l'URL construite
     window.location.href = reloadUrl;
 }
+
+// Appliquer le raccourcissement des noms aux éléments affichés
+document.addEventListener('DOMContentLoaded', function() {
+    // Vue grille - 30 caractères max
+    document.querySelectorAll('.files-grid .file-name').forEach(element => {
+        const fullName = element.textContent.trim();
+        if (fullName.length > 30) {
+            element.textContent = truncateFileName(fullName, 30);
+            element.setAttribute('title', fullName);
+        }
+    });
+
+    // Vue liste - 40 caractères max
+    document.querySelectorAll('.files-list .list-name').forEach(element => {
+        const fullName = element.textContent.trim();
+        if (fullName.length > 40) {
+            element.textContent = truncateFileName(fullName, 40);
+            element.setAttribute('title', fullName);
+        }
+    });
+});
