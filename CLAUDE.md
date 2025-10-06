@@ -73,7 +73,8 @@ drive/
 - **FileExplorer** : Navigation, lecture dossiers, formatage, icônes, chemins relatifs, détection dossiers vides
 - **UploadManager** : Upload sécurisé, validation MIME, gestion doublons, noms sécurisés
 - **TrashManager** : Corbeille avec métadonnées, déplacement sécurisé, renommage automatique ✨
-- **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille, renommage), validation sécurisée
+- **FeedbackManager** : Gestion des feedbacks utilisateurs avec statut et réorganisation ✨
+- **Handlers** : Actions AJAX (création dossiers, masquage, upload, corbeille, renommage, feedbacks), validation sécurisée
 
 ### Sécurité
 - **Protection traversal** : Sécurisation contre l'accès aux dossiers parents
@@ -86,14 +87,27 @@ drive/
 - **Renommage sécurisé** : Protection fichiers système, validation noms, gestion conflits
 - **Fichiers système protégés** : Masquage automatique de index.php, CLAUDE.md, OngouaSync.php ✨
 
+### Système de Feedbacks ✨
+
+#### Fonctionnalités implémentées (06/10/2025)
+- **Bouton Feedbacks dans la sidebar** : Accès rapide au système de gestion des feedbacks
+- **Liste des feedbacks** : Affichage en tableau avec date, message et actions
+- **Ajout de feedbacks** : Modale intuitive avec compteur de caractères (max 500)
+- **Marquage comme traité** : Toggle avec effet visuel barré pour feedbacks complétés
+- **Suppression de feedbacks** : Modale de confirmation avant suppression définitive
+- **Réorganisation par drag & drop** : Glisser-déposer avec SortableJS pour réordonner
+- **Persistance** : Stockage dans `.explorer/feedbacks.json` avec sauvegarde automatique
+- **Interface moderne** : Animations, icônes (✓ vert / ⭕ gris / 🗑️ rouge / ⋮⋮ drag)
+
 ### Fonctionnalités à développer
 
 #### Prochaines étapes suggérées
-1. **Restaurer depuis la corbeille** : Fonctionnalité pour remettre les éléments à leur place
-2. **Vider la corbeille** : Suppression définitive avec confirmation
-3. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
-4. **Aperçu fichiers** : Preview pour images, PDF, texte
-5. **Recherche avancée** : Filtres par type, taille, date
+1. **Créer un raccourci** : Système de liens symboliques pour fichiers/dossiers (suggestion feedback)
+2. **Restaurer depuis la corbeille** : Fonctionnalité pour remettre les éléments à leur place
+3. **Vider la corbeille** : Suppression définitive avec confirmation
+4. **Propriétés** : Modale d'informations détaillées (taille, date, permissions)
+5. **Aperçu fichiers** : Preview pour images, PDF, texte
+6. **Recherche avancée** : Filtres par type, taille, date
 
 ### Notes de développement
 
@@ -102,6 +116,7 @@ drive/
 - **Frontend** : HTML5, CSS3 avec variables, JavaScript ES6+
 - **Animations** : Animate.css 4.1.1
 - **Icônes** : Font Awesome 6.0.0
+- **Drag & Drop** : SortableJS 1.15.0
 
 #### Serveur de développement
 ```bash
@@ -191,6 +206,20 @@ php -S localhost:8000
 - **Algorithme équilibré** : Découpage équitable entre début et fin du nom (sans l'extension)
 - **Fonction JavaScript** : `truncateFileName()` réutilisable et modulaire
 
+#### Système de gestion des feedbacks (06/10/2025) ✨
+- **Architecture complète** : Classe FeedbackManager avec stockage JSON persistant
+- **Ajout de feedbacks** : Modale avec textarea, validation (1-500 caractères), compteur temps réel
+- **Liste interactive** : Tableau avec colonnes Drag | Date | Message | Actions
+- **Marquage comme traité** : Toggle avec icône check (✓ vert si traité, ⭕ gris si non traité)
+- **Effet visuel barré** : Texte avec line-through et opacité réduite pour feedbacks complétés
+- **Suppression sécurisée** : Modale de confirmation avec aperçu du message avant suppression
+- **Réorganisation drag & drop** : SortableJS avec poignée ⋮⋮, animation fluide, sauvegarde automatique
+- **Mise à jour optimiste** : Changements visuels instantanés avec revert automatique en cas d'erreur
+- **Handlers AJAX** : get_feedbacks, add_feedback, delete_feedback, toggle_feedback_status, reorder_feedbacks
+- **Rétrocompatibilité** : Support des feedbacks sans champ `completed`
+- **Interface responsive** : Adaptation mobile avec layout flexible
+- **Feedback visuel** : Messages de succès/erreur, animations Animate.css, curseurs grab/grabbing
+
 ### Problèmes connus
 - Aucun problème critique identifié
 - Toutes les fonctionnalités principales opérationnelles
@@ -202,7 +231,8 @@ php -S localhost:8000
 - Distinction visuelle dossiers vides testée et fonctionnelle ✅
 - Protection automatique fichiers système testée et fonctionnelle ✅
 - Raccourcissement intelligent des noms testé et fonctionnel ✅
+- Système de feedbacks testé et fonctionnel ✅
 
 ---
 *Dernière mise à jour : 2025-10-06*
-*État : Stable et fonctionnel - Raccourcissement intelligent des noms longs implémenté*
+*État : Stable et fonctionnel - Système complet de gestion des feedbacks implémenté*

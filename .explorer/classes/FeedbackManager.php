@@ -137,4 +137,35 @@ class FeedbackManager {
 
         return $newStatus;
     }
+
+    public function reorderFeedbacks($orderedIds) {
+        if (empty($orderedIds) || !is_array($orderedIds)) {
+            throw new Exception('Liste des IDs invalide');
+        }
+
+        $feedbacks = $this->loadFeedbacks();
+
+        // Créer un tableau associatif pour un accès rapide par ID
+        $feedbacksById = [];
+        foreach ($feedbacks as $feedback) {
+            $feedbacksById[$feedback['id']] = $feedback;
+        }
+
+        // Vérifier que tous les IDs existent
+        foreach ($orderedIds as $id) {
+            if (!isset($feedbacksById[$id])) {
+                throw new Exception('Feedback avec ID ' . $id . ' introuvable');
+            }
+        }
+
+        // Réorganiser les feedbacks selon l'ordre fourni
+        $reorderedFeedbacks = [];
+        foreach ($orderedIds as $id) {
+            $reorderedFeedbacks[] = $feedbacksById[$id];
+        }
+
+        $this->saveFeedbacks($reorderedFeedbacks);
+
+        return true;
+    }
 }

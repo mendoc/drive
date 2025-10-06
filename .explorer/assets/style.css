@@ -1240,6 +1240,32 @@ body {
     background: rgba(0, 120, 212, 0.03);
 }
 
+.feedback-col-drag {
+    width: 40px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-drag-handle {
+    cursor: grab;
+    color: #d1d5db;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.feedback-drag-handle:hover {
+    color: #9ca3af;
+}
+
+.feedback-drag-handle:active {
+    cursor: grabbing;
+}
+
 .feedback-col-date {
     width: 150px;
     font-size: 13px;
@@ -1318,6 +1344,22 @@ body {
     color: #6c757d;
 }
 
+/* Styles pour le drag & drop */
+.feedback-ghost {
+    opacity: 0.4;
+}
+
+.feedback-chosen {
+    background: rgba(0, 120, 212, 0.08);
+}
+
+.feedback-drag {
+    cursor: grabbing !important;
+    opacity: 1;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* Textarea pour le feedback */
 .modal-textarea {
     width: 100%;
@@ -1383,6 +1425,10 @@ body {
     .feedback-col-message {
         font-size: 13px;
         margin-bottom: 8px;
+    }
+
+    .feedback-col-drag {
+        width: 30px;
     }
 
     .feedback-col-actions {

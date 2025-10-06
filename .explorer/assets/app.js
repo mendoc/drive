@@ -1215,11 +1215,12 @@ function displayFeedbacks(feedbacks) {
     let tableHTML = `
         <div class="feedbacks-table">
             <div class="feedbacks-header">
+                <div class="feedback-col-drag"></div>
                 <div class="feedback-col-date">Date</div>
                 <div class="feedback-col-message">Message</div>
                 <div class="feedback-col-actions">Actions</div>
             </div>
-            <div class="feedbacks-body">
+            <div class="feedbacks-body" id="feedbacks-body-sortable">
     `;
 
     feedbacks.forEach(feedback => {
@@ -1234,6 +1235,11 @@ function displayFeedbacks(feedbacks) {
 
         tableHTML += `
             <div class="feedback-row ${completedClass}" data-feedback-id="${feedbackId}">
+                <div class="feedback-col-drag">
+                    <div class="feedback-drag-handle" title="Glisser pour réorganiser">
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                </div>
                 <div class="feedback-col-date ${completedClass}">${date}</div>
                 <div class="feedback-col-message ${completedClass}">${message}</div>
                 <div class="feedback-col-actions">
@@ -1254,6 +1260,9 @@ function displayFeedbacks(feedbacks) {
     `;
 
     contentDiv.innerHTML = tableHTML;
+
+    // Initialiser SortableJS après l'affichage du tableau
+    initializeFeedbackSortable();
 }
 
 // Formater la date du feedback
@@ -1540,6 +1549,75 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// === RÉORGANISATION DES FEEDBACKS (DRAG & DROP) ===
+
+// Variable globale pour stocker l'instance Sortable
+let feedbackSortableInstance = null;
+
+// Initialiser SortableJS sur la liste des feedbacks
+function initializeFeedbackSortable() {
+    const feedbacksBody = document.getElementById('feedbacks-body-sortable');
+
+    if (!feedbacksBody || !window.Sortable) {
+        return;
+    }
+
+    // Détruire l'instance précédente si elle existe
+    if (feedbackSortableInstance) {
+        feedbackSortableInstance.destroy();
+    }
+
+    // Créer une nouvelle instance SortableJS
+    feedbackSortableInstance = Sortable.create(feedbacksBody, {
+        animation: 150,
+        handle: '.feedback-drag-handle',
+        ghostClass: 'feedback-ghost',
+        chosenClass: 'feedback-chosen',
+        dragClass: 'feedback-drag',
+        onEnd: function(evt) {
+            // Sauvegarder le nouvel ordre après le drop
+            saveFeedbackOrder();
+        }
+    });
+}
+
+// Sauvegarder l'ordre des feedbacks après réorganisation
+function saveFeedbackOrder() {
+    const feedbackRows = document.querySelectorAll('.feedback-row');
+    const orderedIds = [];
+
+    feedbackRows.forEach(row => {
+        const feedbackId = row.getAttribute('data-feedback-id');
+        if (feedbackId) {
+            orderedIds.push(feedbackId);
+        }
+    });
+
+    if (orderedIds.length === 0) {
+        return;
+    }
+
+    // Envoyer l'ordre au serveur
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=reorder_feedbacks&ordered_ids=' + encodeURIComponent(JSON.stringify(orderedIds))
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Erreur lors de la sauvegarde de l\'ordre:', data.error);
+            // En cas d'erreur, on pourrait recharger la liste pour restaurer l'ordre original
+            // mais on laisse l'utilisateur voir son changement même s'il n'est pas sauvegardé
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+}
 
 // === TOGGLE STATUT FEEDBACK ===
 

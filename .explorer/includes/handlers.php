@@ -33,6 +33,8 @@ function handleAjaxRequest() {
             return handleDeleteFeedbackAction();
         case 'toggle_feedback_status':
             return handleToggleFeedbackStatusAction();
+        case 'reorder_feedbacks':
+            return handleReorderFeedbacksAction();
         default:
             return false;
     }
@@ -445,6 +447,43 @@ function handleToggleFeedbackStatusAction() {
             'success' => true,
             'completed' => $newStatus,
             'message' => $newStatus ? 'Feedback marqué comme traité' : 'Feedback marqué comme non traité'
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+
+    return true;
+}
+
+// Gestion de la réorganisation des feedbacks
+function handleReorderFeedbacksAction() {
+    $orderedIds = $_POST['ordered_ids'] ?? '';
+
+    if (empty($orderedIds)) {
+        echo json_encode(['success' => false, 'error' => 'Liste des IDs manquante']);
+        return true;
+    }
+
+    // Décoder le JSON si c'est une chaîne
+    if (is_string($orderedIds)) {
+        $orderedIds = json_decode($orderedIds, true);
+    }
+
+    if (!is_array($orderedIds)) {
+        echo json_encode(['success' => false, 'error' => 'Format de liste invalide']);
+        return true;
+    }
+
+    try {
+        $feedbackManager = new FeedbackManager('.');
+        $feedbackManager->reorderFeedbacks($orderedIds);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Ordre des feedbacks sauvegardé'
         ]);
     } catch (Exception $e) {
         echo json_encode([
