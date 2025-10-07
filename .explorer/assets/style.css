@@ -58,16 +58,16 @@ body {
     cursor: pointer;
 }
 
-.minimize { 
-    background: #ffbd2e; 
+.minimize {
+    background: #ffbd2e;
 }
 
-.maximize { 
-    background: #28ca42; 
+.maximize {
+    background: #28ca42;
 }
 
-.close { 
-    background: #ff5f56; 
+.close {
+    background: #ff5f56;
 }
 
 .toolbar {
@@ -369,8 +369,13 @@ body {
 }
 
 @keyframes loading-shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 .file-name {
@@ -831,25 +836,25 @@ body {
     .sidebar {
         width: 200px;
     }
-    
+
     .quick-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
-    
+
     .files-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
-    
+
     .view-controls {
         order: -1;
         margin-bottom: 10px;
     }
-    
+
     .list-col-date,
     .list-col-type {
         display: none;
     }
-    
+
     .list-col-size {
         width: 80px;
     }
@@ -1271,6 +1276,8 @@ body {
     font-size: 13px;
     color: #666;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .feedback-col-message {
